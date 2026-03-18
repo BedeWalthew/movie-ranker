@@ -23,6 +23,13 @@ export default {
       );
     }
 
+    if (title.length > 200 || !/^\d{4}$/.test(year)) {
+      return Response.json(
+        { error: "Invalid parameters" },
+        { status: 400 },
+      );
+    }
+
     const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
     const rateCheck = checkRateLimit(ip);
     if (!rateCheck.allowed) {

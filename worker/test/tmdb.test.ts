@@ -98,11 +98,13 @@ describe("TMDB Client", () => {
     );
   });
 
-  it("passes api_key, query, and year as search params", async () => {
+  it("passes query and year as search params and API key as Authorization header", async () => {
     let capturedUrl = "";
-    const fetcher = (async (input: RequestInfo | URL) => {
+    let capturedHeaders: HeadersInit | undefined;
+    const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === "string" ? input : input.toString();
       capturedUrl = url;
+      capturedHeaders = init?.headers;
       return new Response(JSON.stringify({ results: [] }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -111,8 +113,9 @@ describe("TMDB Client", () => {
 
     await searchMovie("The Matrix", "1999", "my-api-key", fetcher);
     const parsed = new URL(capturedUrl);
-    expect(parsed.searchParams.get("api_key")).toBe("my-api-key");
+    expect(parsed.searchParams.get("api_key")).toBeNull();
     expect(parsed.searchParams.get("query")).toBe("The Matrix");
     expect(parsed.searchParams.get("year")).toBe("1999");
+    expect((capturedHeaders as Record<string, string>)?.Authorization).toBe("Bearer my-api-key");
   });
 });
