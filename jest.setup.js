@@ -13,3 +13,14 @@ jest.mock('@expo/vector-icons', () => {
 jest.mock('expo-document-picker', () => ({
   getDocumentAsync: jest.fn(),
 }));
+
+// Mock react-native-view-shot
+jest.mock('react-native-view-shot', () => ({
+  captureRef: jest.fn(),
+}));
+
+// Mock expo-sharing
+jest.mock('expo-sharing', () => ({
+  shareAsync: jest.fn(),
+  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+}));

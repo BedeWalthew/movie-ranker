@@ -24,8 +24,12 @@ describe('Navigation Constants', () => {
       expect(HEADER_MENU_ITEMS).toContain('Settings');
     });
 
-    it('should have exactly 2 menu items', () => {
-      expect(HEADER_MENU_ITEMS).toHaveLength(2);
+    it('should include "Share Top 10"', () => {
+      expect(HEADER_MENU_ITEMS).toContain('Share Top 10');
+    });
+
+    it('should have exactly 3 menu items', () => {
+      expect(HEADER_MENU_ITEMS).toHaveLength(3);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, View, Text, Modal, SafeAreaView, Alert } from 'react-native';
 import { useState } from 'react';
@@ -43,11 +43,14 @@ async function handleImportCsv() {
 
 function HeaderMenu() {
   const [visible, setVisible] = useState(false);
+  const router = useRouter();
 
   const handleMenuPress = (item: string) => {
     setVisible(false);
     if (item === 'Import CSV') {
       handleImportCsv();
+    } else if (item === 'Share Top 10') {
+      router.push('/share');
     }
   };
 
