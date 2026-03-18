@@ -12,17 +12,17 @@ describe("Rate Limiting", () => {
     expect(result.retryAfterMs).toBe(0);
   });
 
-  it("allows up to 30 requests in a window", () => {
+  it("allows up to 300 requests in a window", () => {
     const now = 1000;
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 300; i++) {
       const result = checkRateLimit("1.2.3.4", now);
       expect(result.allowed).toBe(true);
     }
   });
 
-  it("blocks the 31st request in the same window", () => {
+  it("blocks the 301st request in the same window", () => {
     const now = 1000;
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 300; i++) {
       checkRateLimit("1.2.3.4", now);
     }
     const result = checkRateLimit("1.2.3.4", now);
@@ -32,7 +32,7 @@ describe("Rate Limiting", () => {
 
   it("resets the count after the window expires", () => {
     const now = 1000;
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 300; i++) {
       checkRateLimit("1.2.3.4", now);
     }
     const later = now + 61_000;
@@ -42,7 +42,7 @@ describe("Rate Limiting", () => {
 
   it("tracks IPs independently", () => {
     const now = 1000;
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 300; i++) {
       checkRateLimit("1.2.3.4", now);
     }
     const blockedResult = checkRateLimit("1.2.3.4", now);
@@ -54,7 +54,7 @@ describe("Rate Limiting", () => {
 
   it("returns correct retryAfterMs when blocked", () => {
     const now = 1000;
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 300; i++) {
       checkRateLimit("1.2.3.4", now);
     }
     const result = checkRateLimit("1.2.3.4", now + 10_000);

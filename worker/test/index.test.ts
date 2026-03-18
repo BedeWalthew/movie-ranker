@@ -48,7 +48,7 @@ describe("Worker Integration", () => {
   });
 
   it("returns 429 when rate limit is exceeded", async () => {
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 300; i++) {
       await worker.fetch(makeRequest("https://worker.test/movie?title=Test&year=2020"), env, ctx);
     }
     const res = await worker.fetch(makeRequest("https://worker.test/movie?title=Test&year=2020"), env, ctx);
@@ -56,5 +56,5 @@ describe("Worker Integration", () => {
     const body: any = await res.json();
     expect(body.error).toContain("Rate limit");
     expect(res.headers.get("Retry-After")).toBeTruthy();
-  });
+  }, 30_000);
 });

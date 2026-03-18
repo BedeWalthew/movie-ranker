@@ -17,7 +17,7 @@ export interface ImportResult {
 }
 
 const BATCH_SIZE = 5;
-const BATCH_DELAY_MS = 200;
+const BATCH_DELAY_MS = 500;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));

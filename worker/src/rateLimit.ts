@@ -1,5 +1,5 @@
 const WINDOW_MS = 60_000;
-const MAX_REQUESTS = 30;
+const MAX_REQUESTS = 300;
 
 interface RateLimitEntry {
   count: number;
