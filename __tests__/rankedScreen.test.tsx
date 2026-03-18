@@ -11,8 +11,10 @@ jest.mock('@/lib/database', () => ({
 
 // Mock movieRepository
 const mockGetRankedMovies = jest.fn();
+const mockGetRandomUnrankedMovie = jest.fn();
 jest.mock('@/lib/movieRepository', () => ({
   getRankedMovies: (...args: any[]) => mockGetRankedMovies(...args),
+  getRandomUnrankedMovie: (...args: any[]) => mockGetRandomUnrankedMovie(...args),
 }));
 
 // Mock expo-sqlite
@@ -22,9 +24,12 @@ jest.mock('expo-sqlite', () => ({}));
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, back: jest.fn() }),
-  useFocusEffect: (cb: () => void) => {
+  useFocusEffect: (cb: () => void | (() => void)) => {
     const { useEffect } = require('react');
-    useEffect(() => { cb(); }, []);
+    useEffect(() => {
+      const cleanup = cb();
+      return typeof cleanup === 'function' ? cleanup : undefined;
+    });
   },
 }));
 
@@ -66,6 +71,7 @@ describe('RankedScreen', () => {
     jest.clearAllMocks();
     const mockDb = {};
     mockGetDatabase.mockResolvedValue(mockDb);
+    mockGetRandomUnrankedMovie.mockResolvedValue(null);
   });
 
   it('renders ranked movies list', async () => {

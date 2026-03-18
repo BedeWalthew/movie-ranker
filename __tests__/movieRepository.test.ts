@@ -1,6 +1,7 @@
 import {
   insertMovie,
   getUnrankedMovies,
+  getRandomUnrankedMovie,
   getMovieByLetterboxdUri,
   getExistingUris,
   getMovieById,
@@ -109,6 +110,43 @@ describe('movieRepository', () => {
       mockGetAllAsync.mockResolvedValueOnce([]);
       const result = await getUnrankedMovies(mockDb);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('getRandomUnrankedMovie', () => {
+    it('returns a random unranked movie', async () => {
+      const movie: Movie = {
+        id: '1',
+        title: 'Parasite',
+        year: 2019,
+        letterboxdUri: 'https://letterboxd.com/film/parasite/',
+        letterboxdRating: 5,
+        posterUrl: 'https://poster.jpg',
+        director: 'Bong Joon-ho',
+        rank: null,
+      };
+      mockGetFirstAsync.mockResolvedValueOnce(movie);
+
+      const result = await getRandomUnrankedMovie(mockDb);
+
+      expect(mockGetFirstAsync).toHaveBeenCalledWith(
+        expect.stringContaining('rank IS NULL'),
+      );
+      expect(mockGetFirstAsync).toHaveBeenCalledWith(
+        expect.stringContaining('ORDER BY RANDOM()'),
+      );
+      expect(mockGetFirstAsync).toHaveBeenCalledWith(
+        expect.stringContaining('LIMIT 1'),
+      );
+      expect(result).toEqual(movie);
+    });
+
+    it('returns null when no unranked movies exist', async () => {
+      mockGetFirstAsync.mockResolvedValueOnce(null);
+
+      const result = await getRandomUnrankedMovie(mockDb);
+
+      expect(result).toBeNull();
     });
   });
 

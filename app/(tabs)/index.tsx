@@ -1,11 +1,14 @@
 import { View, Text, FlatList, Image, ActivityIndicator, Pressable } from 'react-native';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { getDatabase } from '@/lib/database';
-import { getRankedMovies } from '@/lib/movieRepository';
+import { getRankedMovies, getRandomUnrankedMovie } from '@/lib/movieRepository';
+import { applyFilters } from '@/lib/movieFilters';
+import { SearchFilterBar } from '@/lib/components/SearchFilterBar';
+import { RankNudgeCard } from '@/lib/components/RankNudgeCard';
 import type { Movie } from '@/lib/schema';
 
 function StarRating({ rating, movieId }: { rating: number | null; movieId: string }) {
@@ -23,8 +26,9 @@ function StarRating({ rating, movieId }: { rating: number | null; movieId: strin
   );
 }
 
-function RankedMovieItem({ movie, onRerank }: { movie: Movie; onRerank: (id: string) => void }) {
+function RankedMovieItem({ movie, onRerank, onPress }: { movie: Movie; onRerank: (id: string) => void; onPress: () => void }) {
   return (
+    <Pressable onPress={onPress}>
     <View
       testID={`ranked-item-${movie.id}`}
       style={{
@@ -89,19 +93,32 @@ function RankedMovieItem({ movie, onRerank }: { movie: Movie; onRerank: (id: str
         <Ionicons name="swap-vertical" size={20} color={theme.colors.primary} />
       </Pressable>
     </View>
+    </Pressable>
   );
 }
 
 export default function RankedScreen() {
   const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [nudgeMovie, setNudgeMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [minRating, setMinRating] = useState<number | null>(null);
+
+  const filteredMovies = useMemo(
+    () => applyFilters(movies, searchQuery, minRating),
+    [movies, searchQuery, minRating],
+  );
 
   const loadMovies = useCallback(async () => {
     try {
       const db = await getDatabase();
-      const ranked = await getRankedMovies(db);
+      const [ranked, randomUnranked] = await Promise.all([
+        getRankedMovies(db),
+        getRandomUnrankedMovie(db),
+      ]);
       setMovies(ranked);
+      setNudgeMovie(randomUnranked);
     } catch {
       // silently handle errors
     } finally {
@@ -122,9 +139,21 @@ export default function RankedScreen() {
     [router],
   );
 
+  const handleNudgePress = useCallback(() => {
+    if (nudgeMovie) {
+      router.push({ pathname: '/comparison', params: { movieId: nudgeMovie.id } });
+    }
+  }, [nudgeMovie, router]);
+
   const renderItem = useCallback(
-    ({ item }: { item: Movie }) => <RankedMovieItem movie={item} onRerank={handleRerank} />,
-    [handleRerank],
+    ({ item }: { item: Movie }) => (
+      <RankedMovieItem
+        movie={item}
+        onRerank={handleRerank}
+        onPress={() => router.push(`/movie/${item.id}`)}
+      />
+    ),
+    [handleRerank, router],
   );
 
   const keyExtractor = useCallback((item: Movie) => item.id, []);
@@ -140,6 +169,7 @@ export default function RankedScreen() {
   if (movies.length === 0) {
     return (
       <View testID="ranked-screen" style={{ flex: 1, backgroundColor: theme.colors.background, alignItems: 'center', justifyContent: 'center' }}>
+        {nudgeMovie && <RankNudgeCard movie={nudgeMovie} onPress={handleNudgePress} />}
         <Text testID="ranked-placeholder" style={{ color: theme.colors.text, fontSize: 18 }}>Ranked Movies</Text>
         <Text style={{ color: theme.colors.textSecondary, marginTop: 8 }}>Your ranked movies will appear here</Text>
       </View>
@@ -148,11 +178,22 @@ export default function RankedScreen() {
 
   return (
     <View testID="ranked-screen" style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <SearchFilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        minRating={minRating}
+        onMinRatingChange={setMinRating}
+      />
       <FlatList
         testID="ranked-list"
-        data={movies}
+        data={filteredMovies}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
+        ListHeaderComponent={
+          nudgeMovie ? (
+            <RankNudgeCard movie={nudgeMovie} onPress={handleNudgePress} />
+          ) : null
+        }
         initialNumToRender={15}
         maxToRenderPerBatch={10}
         windowSize={5}
