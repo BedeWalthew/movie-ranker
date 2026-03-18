@@ -42,3 +42,10 @@ export async function getExistingUris(
   );
   return new Set(rows.map((r) => r.letterboxdUri));
 }
+
+export async function getMovieById(
+  db: SQLiteDatabase,
+  id: string,
+): Promise<Movie | null> {
+  return db.getFirstAsync<Movie>('SELECT * FROM movies WHERE id = ?', [id]);
+}

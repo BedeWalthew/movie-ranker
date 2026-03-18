@@ -3,6 +3,10 @@ import {
   getUnrankedMovies,
   getMovieByLetterboxdUri,
   getExistingUris,
+  getMovieById,
+  getRankedMovies,
+  insertMovieAtRank,
+  removeFromRanked,
 } from '@/lib/movieRepository';
 import type { Movie } from '@/lib/schema';
 
@@ -161,6 +165,38 @@ describe('movieRepository', () => {
       const result = await getExistingUris(mockDb, ['https://letterboxd.com/film/x/']);
 
       expect(result.size).toBe(0);
+    });
+  });
+
+  describe('getMovieById', () => {
+    it('returns movie when found', async () => {
+      const movie: Movie = {
+        id: 'test-id',
+        title: 'Parasite',
+        year: 2019,
+        letterboxdUri: 'https://letterboxd.com/film/parasite/',
+        letterboxdRating: 5,
+        posterUrl: null,
+        director: 'Bong Joon-ho',
+        rank: 1,
+      };
+      mockGetFirstAsync.mockResolvedValueOnce(movie);
+
+      const result = await getMovieById(mockDb, 'test-id');
+
+      expect(mockGetFirstAsync).toHaveBeenCalledWith(
+        expect.stringContaining('SELECT * FROM movies WHERE id = ?'),
+        ['test-id'],
+      );
+      expect(result).toEqual(movie);
+    });
+
+    it('returns null when not found', async () => {
+      mockGetFirstAsync.mockResolvedValueOnce(null);
+
+      const result = await getMovieById(mockDb, 'nonexistent');
+
+      expect(result).toBeNull();
     });
   });
 });

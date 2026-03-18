@@ -1,9 +1,12 @@
-import { View, Text, FlatList, Image, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, Image, ActivityIndicator, Pressable } from 'react-native';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { theme } from '@/lib/theme';
 import { getDatabase } from '@/lib/database';
 import { getUnrankedMovies } from '@/lib/movieRepository';
+import { applyFilters } from '@/lib/movieFilters';
+import { SearchFilterBar } from '@/lib/components/SearchFilterBar';
 import type { Movie } from '@/lib/schema';
 
 function shuffleArray<T>(array: T[]): T[] {
@@ -30,10 +33,11 @@ function StarRating({ rating, movieId }: { rating: number | null; movieId: strin
   );
 }
 
-function MovieItem({ movie }: { movie: Movie }) {
+function MovieItem({ movie, onPress }: { movie: Movie; onPress: () => void }) {
   return (
-    <View
-      testID={`movie-item-${movie.id}`}
+    <Pressable onPress={onPress}>
+      <View
+        testID={`movie-item-${movie.id}`}
       style={{
         flexDirection: 'row',
         padding: 12,
@@ -72,12 +76,21 @@ function MovieItem({ movie }: { movie: Movie }) {
         <StarRating rating={movie.letterboxdRating} movieId={movie.id} />
       </View>
     </View>
+    </Pressable>
   );
 }
 
 export default function UnrankedScreen() {
+  const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [minRating, setMinRating] = useState<number | null>(null);
+
+  const filteredMovies = useMemo(
+    () => applyFilters(movies, searchQuery, minRating),
+    [movies, searchQuery, minRating],
+  );
 
   const loadMovies = useCallback(async () => {
     try {
@@ -96,8 +109,10 @@ export default function UnrankedScreen() {
   }, [loadMovies]);
 
   const renderItem = useCallback(
-    ({ item }: { item: Movie }) => <MovieItem movie={item} />,
-    [],
+    ({ item }: { item: Movie }) => (
+      <MovieItem movie={item} onPress={() => router.push(`/movie/${item.id}`)} />
+    ),
+    [router],
   );
 
   const keyExtractor = useCallback((item: Movie) => item.id, []);
@@ -127,9 +142,15 @@ export default function UnrankedScreen() {
 
   return (
     <View testID="unranked-screen" style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <SearchFilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        minRating={minRating}
+        onMinRatingChange={setMinRating}
+      />
       <FlatList
         testID="movie-list"
-        data={movies}
+        data={filteredMovies}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         initialNumToRender={15}

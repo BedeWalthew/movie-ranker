@@ -16,6 +16,11 @@ jest.mock('@/lib/movieRepository', () => ({
 
 jest.mock('expo-sqlite', () => ({}));
 
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  useRouter: jest.fn(() => ({ push: jest.fn(), back: jest.fn() })),
+}));
+
 describe('Screen Components', () => {
   describe('RankedScreen', () => {
     it('should render with ranked-screen testID', () => {

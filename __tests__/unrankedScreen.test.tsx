@@ -18,6 +18,11 @@ jest.mock('@/lib/movieRepository', () => ({
 // Mock expo-sqlite
 jest.mock('expo-sqlite', () => ({}));
 
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  useRouter: jest.fn(() => ({ push: jest.fn(), back: jest.fn() })),
+}));
+
 const sampleMovies: Movie[] = [
   {
     id: '1',
