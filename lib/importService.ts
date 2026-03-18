@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { v4 as uuidv4 } from 'uuid';
+import * as Crypto from 'expo-crypto';
 import { parseLetterboxdCsv } from './csv';
 import { fetchMovieDetails } from './tmdbClient';
 import { insertMovie, getExistingUris } from './movieRepository';
@@ -55,7 +55,7 @@ export async function importMoviesFromCsv(
     const tmdbData = await fetchMovieDetails(entry.title, entry.year, workerUrl);
 
     const movie: Movie = {
-      id: uuidv4(),
+      id: Crypto.randomUUID(),
       title: entry.title,
       year: entry.year,
       letterboxdUri: entry.letterboxdUri,

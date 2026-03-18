@@ -7,7 +7,7 @@ import * as movieRepository from '@/lib/movieRepository';
 jest.mock('@/lib/csv');
 jest.mock('@/lib/tmdbClient');
 jest.mock('@/lib/movieRepository');
-jest.mock('uuid', () => ({ v4: () => 'mock-uuid' }));
+jest.mock('expo-crypto', () => ({ randomUUID: () => 'mock-uuid' }));
 
 const mockDb = {} as any;
 
