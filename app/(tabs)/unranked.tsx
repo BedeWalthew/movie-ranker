@@ -1,12 +1,14 @@
 import { View, Text, FlatList, Image, ActivityIndicator, Pressable } from 'react-native';
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { theme } from '@/lib/theme';
 import { getDatabase } from '@/lib/database';
 import { getUnrankedMovies } from '@/lib/movieRepository';
 import { applyFilters } from '@/lib/movieFilters';
 import { SearchFilterBar } from '@/lib/components/SearchFilterBar';
+import { useRefresh } from '@/lib/refreshContext';
 import type { Movie } from '@/lib/schema';
 
 function shuffleArray<T>(array: T[]): T[] {
@@ -102,6 +104,7 @@ export default function UnrankedScreen() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [minRating, setMinRating] = useState<number | null>(null);
+  const { refreshKey } = useRefresh();
 
   const filteredMovies = useMemo(
     () => applyFilters(movies, searchQuery, minRating),
@@ -120,9 +123,22 @@ export default function UnrankedScreen() {
     }
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadMovies();
+    }, [loadMovies]),
+  );
+
+  // Reload when a global refresh is triggered (e.g. after import or reset),
+  // but skip on first render since useFocusEffect already handles initial load.
+  const isFirstRender = useRef(true);
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     loadMovies();
-  }, [loadMovies]);
+  }, [refreshKey, loadMovies]);
 
   const renderItem = useCallback(
     ({ item }: { item: Movie }) => (

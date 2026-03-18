@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
 import UnrankedScreen from '@/app/(tabs)/unranked';
+import { RefreshProvider } from '@/lib/refreshContext';
 import type { Movie } from '@/lib/schema';
 
 // Mock database module
@@ -21,7 +22,15 @@ jest.mock('expo-sqlite', () => ({}));
 // Mock expo-router
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(() => ({ push: jest.fn(), back: jest.fn() })),
+  useFocusEffect: (cb: () => void) => {
+    const { useEffect } = require('react');
+    useEffect(() => { cb(); }, []);
+  },
 }));
+
+function renderWithRefresh(ui: React.ReactElement) {
+  return render(<RefreshProvider>{ui}</RefreshProvider>);
+}
 
 const sampleMovies: Movie[] = [
   {
@@ -55,13 +64,13 @@ describe('UnrankedScreen', () => {
 
   it('renders the unranked screen container', async () => {
     mockGetUnrankedMovies.mockResolvedValue([]);
-    const { getByTestId } = render(<UnrankedScreen />);
+    const { getByTestId } = renderWithRefresh(<UnrankedScreen />);
     expect(getByTestId('unranked-screen')).toBeTruthy();
   });
 
   it('shows empty state when no unranked movies exist', async () => {
     mockGetUnrankedMovies.mockResolvedValue([]);
-    const { getByTestId } = render(<UnrankedScreen />);
+    const { getByTestId } = renderWithRefresh(<UnrankedScreen />);
 
     await waitFor(() => {
       expect(getByTestId('unranked-empty')).toBeTruthy();
@@ -70,7 +79,7 @@ describe('UnrankedScreen', () => {
 
   it('displays movie titles when unranked movies exist', async () => {
     mockGetUnrankedMovies.mockResolvedValue(sampleMovies);
-    const { getByText } = render(<UnrankedScreen />);
+    const { getByText } = renderWithRefresh(<UnrankedScreen />);
 
     await waitFor(() => {
       expect(getByText('Parasite')).toBeTruthy();
@@ -80,7 +89,7 @@ describe('UnrankedScreen', () => {
 
   it('displays movie years', async () => {
     mockGetUnrankedMovies.mockResolvedValue(sampleMovies);
-    const { getByText } = render(<UnrankedScreen />);
+    const { getByText } = renderWithRefresh(<UnrankedScreen />);
 
     await waitFor(() => {
       expect(getByText(/2019/)).toBeTruthy();
@@ -90,7 +99,7 @@ describe('UnrankedScreen', () => {
 
   it('displays Letterboxd ratings', async () => {
     mockGetUnrankedMovies.mockResolvedValue(sampleMovies);
-    const { getAllByTestId } = render(<UnrankedScreen />);
+    const { getAllByTestId } = renderWithRefresh(<UnrankedScreen />);
 
     await waitFor(() => {
       const ratingElements = getAllByTestId(/movie-rating-/);
@@ -100,7 +109,7 @@ describe('UnrankedScreen', () => {
 
   it('renders poster images for movies with posterUrl', async () => {
     mockGetUnrankedMovies.mockResolvedValue(sampleMovies);
-    const { getByTestId } = render(<UnrankedScreen />);
+    const { getByTestId } = renderWithRefresh(<UnrankedScreen />);
 
     await waitFor(() => {
       const poster = getByTestId('movie-poster-1');
@@ -110,7 +119,7 @@ describe('UnrankedScreen', () => {
 
   it('renders placeholder for movies without posterUrl', async () => {
     mockGetUnrankedMovies.mockResolvedValue(sampleMovies);
-    const { getByTestId } = render(<UnrankedScreen />);
+    const { getByTestId } = renderWithRefresh(<UnrankedScreen />);
 
     await waitFor(() => {
       const placeholder = getByTestId('movie-poster-placeholder-2');
@@ -120,7 +129,7 @@ describe('UnrankedScreen', () => {
 
   it('uses FlatList for rendering (has movie-list testID)', async () => {
     mockGetUnrankedMovies.mockResolvedValue(sampleMovies);
-    const { getByTestId } = render(<UnrankedScreen />);
+    const { getByTestId } = renderWithRefresh(<UnrankedScreen />);
 
     await waitFor(() => {
       expect(getByTestId('movie-list')).toBeTruthy();

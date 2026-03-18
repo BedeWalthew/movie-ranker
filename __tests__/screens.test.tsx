@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react-native';
 import RankedScreen from '@/app/(tabs)/index';
 import UnrankedScreen from '@/app/(tabs)/unranked';
+import { RefreshProvider } from '@/lib/refreshContext';
 
 // Mock database module
 const mockGetDatabase = jest.fn().mockResolvedValue({});
@@ -29,22 +30,26 @@ jest.mock('expo-router', () => ({
   },
 }));
 
+function renderWithRefresh(ui: React.ReactElement) {
+  return render(<RefreshProvider>{ui}</RefreshProvider>);
+}
+
 describe('Screen Components', () => {
   describe('RankedScreen', () => {
     it('should render with ranked-screen testID', () => {
-      render(<RankedScreen />);
+      renderWithRefresh(<RankedScreen />);
       expect(screen.getByTestId('ranked-screen')).toBeTruthy();
     });
 
     it('should display placeholder text', async () => {
-      render(<RankedScreen />);
+      renderWithRefresh(<RankedScreen />);
       const placeholder = await screen.findByTestId('ranked-placeholder');
       expect(placeholder).toBeTruthy();
       expect(screen.getByText('Ranked Movies')).toBeTruthy();
     });
 
     it('should use dark background color', () => {
-      render(<RankedScreen />);
+      renderWithRefresh(<RankedScreen />);
       const container = screen.getByTestId('ranked-screen');
       expect(container.props.style).toMatchObject(
         expect.objectContaining({
@@ -77,7 +82,7 @@ describe('Screen Components', () => {
         },
       ]);
 
-      render(<RankedScreen />);
+      renderWithRefresh(<RankedScreen />);
       const nudge = await screen.findByTestId('rank-nudge-card');
       expect(nudge).toBeTruthy();
       expect(screen.getByText('Parasite')).toBeTruthy();
@@ -98,7 +103,7 @@ describe('Screen Components', () => {
         },
       ]);
 
-      render(<RankedScreen />);
+      renderWithRefresh(<RankedScreen />);
       await waitFor(() => {
         expect(screen.getByTestId('ranked-list')).toBeTruthy();
       });
@@ -122,7 +127,7 @@ describe('Screen Components', () => {
       });
       mockGetRankedMovies.mockResolvedValueOnce([]);
 
-      render(<RankedScreen />);
+      renderWithRefresh(<RankedScreen />);
       const nudge = await screen.findByTestId('rank-nudge-card');
       const { fireEvent } = require('@testing-library/react-native');
       fireEvent.press(nudge);
@@ -135,19 +140,19 @@ describe('Screen Components', () => {
 
   describe('UnrankedScreen', () => {
     it('should render with unranked-screen testID', () => {
-      render(<UnrankedScreen />);
+      renderWithRefresh(<UnrankedScreen />);
       expect(screen.getByTestId('unranked-screen')).toBeTruthy();
     });
 
     it('should display empty state text when no movies', async () => {
-      render(<UnrankedScreen />);
+      renderWithRefresh(<UnrankedScreen />);
       const emptyState = await screen.findByTestId('unranked-empty');
       expect(emptyState).toBeTruthy();
       expect(screen.getByText('Unranked Movies')).toBeTruthy();
     });
 
     it('should use dark background color', () => {
-      render(<UnrankedScreen />);
+      renderWithRefresh(<UnrankedScreen />);
       const container = screen.getByTestId('unranked-screen');
       expect(container.props.style).toMatchObject(
         expect.objectContaining({
