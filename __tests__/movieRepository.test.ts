@@ -8,6 +8,7 @@ import {
   getRankedMovies,
   insertMovieAtRank,
   removeFromRanked,
+  deleteAllMovies,
 } from '@/lib/movieRepository';
 import type { Movie } from '@/lib/schema';
 
@@ -362,6 +363,16 @@ describe('movieRepository', () => {
       await removeFromRanked(mockDb, 'movie-id');
 
       expect(mockRunAsync).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteAllMovies', () => {
+    it('executes DELETE FROM movies', async () => {
+      mockRunAsync.mockResolvedValueOnce(undefined);
+
+      await deleteAllMovies(mockDb);
+
+      expect(mockRunAsync).toHaveBeenCalledWith('DELETE FROM movies');
     });
   });
 });

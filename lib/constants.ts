@@ -6,6 +6,7 @@ export const TAB_NAMES = {
 export const HEADER_MENU_ITEMS = [
   "Import CSV",
   "Share Top 10",
+  "Reset Movies",
   "Settings",
 ] as const;
 

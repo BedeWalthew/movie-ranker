@@ -7,6 +7,7 @@ import { theme } from '@/lib/theme';
 import { TAB_NAMES, HEADER_MENU_ITEMS, WORKER_URL } from '@/lib/constants';
 import { getDatabase } from '@/lib/database';
 import { importMoviesFromCsv } from '@/lib/importService';
+import { deleteAllMovies } from '@/lib/movieRepository';
 
 async function handleImportCsv() {
   try {
@@ -60,6 +61,27 @@ function HeaderMenu() {
         handleImportCsv();
       } else if (item === 'Share Top 10') {
         router.push('/share');
+      } else if (item === 'Reset Movies') {
+        Alert.alert(
+          'Reset Movies',
+          'This will permanently delete all your movies and rankings. This cannot be undone.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Reset',
+              style: 'destructive',
+              onPress: async () => {
+                try {
+                  const db = await getDatabase();
+                  await deleteAllMovies(db);
+                  Alert.alert('Done', 'All movies have been deleted.');
+                } catch {
+                  Alert.alert('Error', 'Failed to reset movies.');
+                }
+              },
+            },
+          ],
+        );
       }
     }, 350);
   };
@@ -98,11 +120,18 @@ function HeaderMenu() {
               {HEADER_MENU_ITEMS.map((item) => (
                 <Pressable
                   key={item}
-                  testID={`menu-item-${item.toLowerCase().replace(' ', '-')}`}
+                  testID={`menu-item-${item.toLowerCase().replace(/ /g, '-')}`}
                   onPress={() => handleMenuPress(item)}
                   style={{ padding: 14 }}
                 >
-                  <Text style={{ color: theme.colors.text, fontSize: 16 }}>{item}</Text>
+                  <Text
+                    style={{
+                      color: item === 'Reset Movies' ? theme.colors.error : theme.colors.text,
+                      fontSize: 16,
+                    }}
+                  >
+                    {item}
+                  </Text>
                 </Pressable>
               ))}
             </View>

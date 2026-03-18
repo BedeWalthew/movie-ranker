@@ -93,3 +93,7 @@ export async function removeFromRanked(
     [movie.rank],
   );
 }
+
+export async function deleteAllMovies(db: SQLiteDatabase): Promise<void> {
+  await db.runAsync('DELETE FROM movies');
+}

@@ -28,8 +28,8 @@ describe('Navigation Constants', () => {
       expect(HEADER_MENU_ITEMS).toContain('Share Top 10');
     });
 
-    it('should have exactly 3 menu items', () => {
-      expect(HEADER_MENU_ITEMS).toHaveLength(3);
+    it('should have exactly 4 menu items', () => {
+      expect(HEADER_MENU_ITEMS).toHaveLength(4);
     });
   });
 });

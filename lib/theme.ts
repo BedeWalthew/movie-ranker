@@ -4,6 +4,7 @@ export const theme = {
     surface: '#1A1A2E',
     surfaceLight: '#252540',
     primary: '#00D4AA',
+    error: '#FF3B30',
     text: '#E8E8E8',
     textSecondary: '#9CA3AF',
     tabBar: '#111111',
