@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Movie Ranker",
+    "slug": "movie-ranker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "movie-ranker",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0D0D0D"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.movieranker.app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite"
+    ]
+  }
+}
