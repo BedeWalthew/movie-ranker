@@ -11,15 +11,18 @@ import { importMoviesFromCsv } from '@/lib/importService';
 async function handleImportCsv() {
   try {
     const result = await DocumentPicker.getDocumentAsync({
-      type: 'text/csv',
+      type: '*/*',
       copyToCacheDirectory: true,
     });
 
     if (result.canceled || !result.assets?.[0]) return;
 
     const file = result.assets[0];
+    console.log('[Import] File selected:', file.name, file.uri, file.mimeType);
+
     const response = await fetch(file.uri);
     const csvContent = await response.text();
+    console.log('[Import] CSV length:', csvContent.length, 'First 200 chars:', csvContent.substring(0, 200));
 
     const db = await getDatabase();
 
@@ -28,16 +31,18 @@ async function handleImportCsv() {
       csvContent,
       WORKER_URL,
       (progress) => {
-        // Progress is available for UI updates if needed
+        console.log(`[Import] Progress: ${progress.current}/${progress.total}`);
       },
     );
 
+    console.log('[Import] Result:', importResult);
     Alert.alert(
       'Import Complete',
       `Imported ${importResult.imported} movies.\n${importResult.skipped} duplicates skipped.`,
     );
-  } catch {
-    Alert.alert('Import Error', 'Failed to import CSV file.');
+  } catch (error) {
+    console.error('[Import] Error:', error);
+    Alert.alert('Import Error', `Failed to import CSV file.\n${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
