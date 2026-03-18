@@ -49,3 +49,41 @@ export async function getMovieById(
 ): Promise<Movie | null> {
   return db.getFirstAsync<Movie>('SELECT * FROM movies WHERE id = ?', [id]);
 }
+
+export async function getRankedMovies(db: SQLiteDatabase): Promise<Movie[]> {
+  return db.getAllAsync<Movie>(
+    'SELECT * FROM movies WHERE rank IS NOT NULL ORDER BY rank ASC',
+  );
+}
+
+export async function insertMovieAtRank(
+  db: SQLiteDatabase,
+  movieId: string,
+  position: number,
+): Promise<void> {
+  await db.runAsync(
+    'UPDATE movies SET rank = rank + 1 WHERE rank IS NOT NULL AND rank >= ?',
+    [position],
+  );
+  await db.runAsync('UPDATE movies SET rank = ? WHERE id = ?', [
+    position,
+    movieId,
+  ]);
+}
+
+export async function removeFromRanked(
+  db: SQLiteDatabase,
+  movieId: string,
+): Promise<void> {
+  const movie = await db.getFirstAsync<Movie>(
+    'SELECT * FROM movies WHERE id = ?',
+    [movieId],
+  );
+  if (!movie || movie.rank === null) return;
+
+  await db.runAsync('UPDATE movies SET rank = NULL WHERE id = ?', [movieId]);
+  await db.runAsync(
+    'UPDATE movies SET rank = rank - 1 WHERE rank IS NOT NULL AND rank > ?',
+    [movie.rank],
+  );
+}

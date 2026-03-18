@@ -21,6 +21,13 @@ export default function RootLayout() {
             headerTintColor: theme.colors.text,
           }}
         />
+        <Stack.Screen
+          name="comparison"
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
       </Stack>
     </>
   );

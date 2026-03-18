@@ -33,7 +33,7 @@ function StarRating({ rating, movieId }: { rating: number | null; movieId: strin
   );
 }
 
-function MovieItem({ movie, onPress }: { movie: Movie; onPress: () => void }) {
+function MovieItem({ movie, onPress, onRank }: { movie: Movie; onPress: () => void; onRank: () => void }) {
   return (
     <Pressable onPress={onPress}>
       <View
@@ -75,6 +75,22 @@ function MovieItem({ movie, onPress }: { movie: Movie; onPress: () => void }) {
         </Text>
         <StarRating rating={movie.letterboxdRating} movieId={movie.id} />
       </View>
+      <Pressable
+        testID={`rank-button-${movie.id}`}
+        onPress={(e) => {
+          e.stopPropagation();
+          onRank();
+        }}
+        style={{
+          backgroundColor: theme.colors.primary,
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderRadius: 8,
+          alignSelf: 'center',
+        }}
+      >
+        <Text style={{ color: theme.colors.background, fontSize: 13, fontWeight: '700' }}>Rank</Text>
+      </Pressable>
     </View>
     </Pressable>
   );
@@ -110,7 +126,11 @@ export default function UnrankedScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: Movie }) => (
-      <MovieItem movie={item} onPress={() => router.push(`/movie/${item.id}`)} />
+      <MovieItem
+        movie={item}
+        onPress={() => router.push(`/movie/${item.id}`)}
+        onRank={() => router.push({ pathname: '/comparison', params: { movieId: item.id } })}
+      />
     ),
     [router],
   );

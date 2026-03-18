@@ -1,17 +1,19 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { render, screen, waitFor } from '@testing-library/react-native';
 import RankedScreen from '@/app/(tabs)/index';
 import UnrankedScreen from '@/app/(tabs)/unranked';
 
-// Mock database and repository for UnrankedScreen
+// Mock database module
 const mockGetDatabase = jest.fn().mockResolvedValue({});
 jest.mock('@/lib/database', () => ({
   getDatabase: () => mockGetDatabase(),
 }));
 
 const mockGetUnrankedMovies = jest.fn().mockResolvedValue([]);
+const mockGetRankedMovies = jest.fn().mockResolvedValue([]);
 jest.mock('@/lib/movieRepository', () => ({
   getUnrankedMovies: (...args: any[]) => mockGetUnrankedMovies(...args),
+  getRankedMovies: (...args: any[]) => mockGetRankedMovies(...args),
 }));
 
 jest.mock('expo-sqlite', () => ({}));
@@ -28,9 +30,10 @@ describe('Screen Components', () => {
       expect(screen.getByTestId('ranked-screen')).toBeTruthy();
     });
 
-    it('should display placeholder text', () => {
+    it('should display placeholder text', async () => {
       render(<RankedScreen />);
-      expect(screen.getByTestId('ranked-placeholder')).toBeTruthy();
+      const placeholder = await screen.findByTestId('ranked-placeholder');
+      expect(placeholder).toBeTruthy();
       expect(screen.getByText('Ranked Movies')).toBeTruthy();
     });
 

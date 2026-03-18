@@ -199,4 +199,131 @@ describe('movieRepository', () => {
       expect(result).toBeNull();
     });
   });
+
+  describe('getRankedMovies', () => {
+    it('returns all ranked movies ordered by rank', async () => {
+      const movies: Movie[] = [
+        {
+          id: '1',
+          title: 'Parasite',
+          year: 2019,
+          letterboxdUri: 'https://letterboxd.com/film/parasite/',
+          letterboxdRating: 5,
+          posterUrl: null,
+          director: 'Bong Joon-ho',
+          rank: 1,
+        },
+        {
+          id: '2',
+          title: 'Inception',
+          year: 2010,
+          letterboxdUri: 'https://letterboxd.com/film/inception/',
+          letterboxdRating: 4.5,
+          posterUrl: null,
+          director: 'Christopher Nolan',
+          rank: 2,
+        },
+      ];
+      mockGetAllAsync.mockResolvedValueOnce(movies);
+
+      const result = await getRankedMovies(mockDb);
+
+      expect(mockGetAllAsync).toHaveBeenCalledWith(
+        expect.stringContaining('rank IS NOT NULL'),
+      );
+      expect(mockGetAllAsync).toHaveBeenCalledWith(
+        expect.stringContaining('ORDER BY rank ASC'),
+      );
+      expect(result).toEqual(movies);
+    });
+
+    it('returns empty array when no ranked movies', async () => {
+      mockGetAllAsync.mockResolvedValueOnce([]);
+      const result = await getRankedMovies(mockDb);
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('insertMovieAtRank', () => {
+    it('shifts existing movies down and sets rank', async () => {
+      mockRunAsync.mockResolvedValue(undefined);
+
+      await insertMovieAtRank(mockDb, 'movie-id', 3);
+
+      // First call: shift ranks down for movies at rank >= 3
+      expect(mockRunAsync).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE movies SET rank = rank + 1'),
+        expect.arrayContaining([3]),
+      );
+
+      // Second call: set movie rank
+      expect(mockRunAsync).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE movies SET rank ='),
+        expect.arrayContaining([3, 'movie-id']),
+      );
+    });
+
+    it('calls runAsync exactly twice', async () => {
+      mockRunAsync.mockResolvedValue(undefined);
+
+      await insertMovieAtRank(mockDb, 'movie-id', 1);
+
+      expect(mockRunAsync).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('removeFromRanked', () => {
+    it('sets rank to null and closes the gap', async () => {
+      mockGetFirstAsync.mockResolvedValueOnce({
+        id: 'movie-id',
+        title: 'Test',
+        year: 2020,
+        letterboxdUri: 'https://letterboxd.com/film/test/',
+        letterboxdRating: null,
+        posterUrl: null,
+        director: null,
+        rank: 5,
+      });
+      mockRunAsync.mockResolvedValue(undefined);
+
+      await removeFromRanked(mockDb, 'movie-id');
+
+      // First call: set rank to null
+      expect(mockRunAsync).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE movies SET rank = NULL'),
+        expect.arrayContaining(['movie-id']),
+      );
+
+      // Second call: close the gap
+      expect(mockRunAsync).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE movies SET rank = rank - 1'),
+        expect.arrayContaining([5]),
+      );
+    });
+
+    it('does nothing if movie not found', async () => {
+      mockGetFirstAsync.mockResolvedValueOnce(null);
+
+      await removeFromRanked(mockDb, 'nonexistent');
+
+      expect(mockRunAsync).not.toHaveBeenCalled();
+    });
+
+    it('does nothing if movie has no rank', async () => {
+      mockGetFirstAsync.mockResolvedValueOnce({
+        id: 'movie-id',
+        title: 'Test',
+        year: 2020,
+        letterboxdUri: 'https://letterboxd.com/film/test/',
+        letterboxdRating: null,
+        posterUrl: null,
+        director: null,
+        rank: null,
+      });
+
+      await removeFromRanked(mockDb, 'movie-id');
+
+      expect(mockRunAsync).not.toHaveBeenCalled();
+    });
+  });
 });
