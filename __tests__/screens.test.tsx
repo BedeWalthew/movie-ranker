@@ -11,9 +11,11 @@ jest.mock('@/lib/database', () => ({
 
 const mockGetUnrankedMovies = jest.fn().mockResolvedValue([]);
 const mockGetRankedMovies = jest.fn().mockResolvedValue([]);
+const mockGetRandomUnrankedMovie = jest.fn().mockResolvedValue(null);
 jest.mock('@/lib/movieRepository', () => ({
   getUnrankedMovies: (...args: any[]) => mockGetUnrankedMovies(...args),
   getRankedMovies: (...args: any[]) => mockGetRankedMovies(...args),
+  getRandomUnrankedMovie: (...args: any[]) => mockGetRandomUnrankedMovie(...args),
 }));
 
 jest.mock('expo-sqlite', () => ({}));
@@ -21,6 +23,10 @@ jest.mock('expo-sqlite', () => ({}));
 // Mock expo-router
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(() => ({ push: jest.fn(), back: jest.fn() })),
+  useFocusEffect: (cb: () => void) => {
+    const { useEffect } = require('react');
+    useEffect(() => { cb(); }, []);
+  },
 }));
 
 describe('Screen Components', () => {
@@ -45,6 +51,85 @@ describe('Screen Components', () => {
           backgroundColor: expect.stringMatching(/^#[0-1][0-9A-Fa-f]/),
         })
       );
+    });
+
+    it('should show nudge card when an unranked movie exists', async () => {
+      mockGetRandomUnrankedMovie.mockResolvedValueOnce({
+        id: 'movie-1',
+        title: 'Parasite',
+        year: 2019,
+        letterboxdUri: 'https://letterboxd.com/film/parasite/',
+        letterboxdRating: 4.5,
+        posterUrl: 'https://poster.jpg',
+        director: 'Bong Joon-ho',
+        rank: null,
+      });
+      mockGetRankedMovies.mockResolvedValueOnce([
+        {
+          id: 'ranked-1',
+          title: 'Inception',
+          year: 2010,
+          letterboxdUri: 'https://letterboxd.com/film/inception/',
+          letterboxdRating: 4.5,
+          posterUrl: null,
+          director: 'Christopher Nolan',
+          rank: 1,
+        },
+      ]);
+
+      render(<RankedScreen />);
+      const nudge = await screen.findByTestId('rank-nudge-card');
+      expect(nudge).toBeTruthy();
+      expect(screen.getByText('Parasite')).toBeTruthy();
+    });
+
+    it('should not show nudge card when no unranked movies exist', async () => {
+      mockGetRandomUnrankedMovie.mockResolvedValueOnce(null);
+      mockGetRankedMovies.mockResolvedValueOnce([
+        {
+          id: 'ranked-1',
+          title: 'Inception',
+          year: 2010,
+          letterboxdUri: 'https://letterboxd.com/film/inception/',
+          letterboxdRating: 4.5,
+          posterUrl: null,
+          director: 'Christopher Nolan',
+          rank: 1,
+        },
+      ]);
+
+      render(<RankedScreen />);
+      await waitFor(() => {
+        expect(screen.getByTestId('ranked-list')).toBeTruthy();
+      });
+      expect(screen.queryByTestId('rank-nudge-card')).toBeNull();
+    });
+
+    it('should navigate to comparison on nudge press', async () => {
+      const mockPush = jest.fn();
+      const { useRouter } = require('expo-router');
+      useRouter.mockReturnValue({ push: mockPush, back: jest.fn() });
+
+      mockGetRandomUnrankedMovie.mockResolvedValueOnce({
+        id: 'movie-1',
+        title: 'Parasite',
+        year: 2019,
+        letterboxdUri: 'https://letterboxd.com/film/parasite/',
+        letterboxdRating: 4.5,
+        posterUrl: 'https://poster.jpg',
+        director: 'Bong Joon-ho',
+        rank: null,
+      });
+      mockGetRankedMovies.mockResolvedValueOnce([]);
+
+      render(<RankedScreen />);
+      const nudge = await screen.findByTestId('rank-nudge-card');
+      const { fireEvent } = require('@testing-library/react-native');
+      fireEvent.press(nudge);
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/comparison',
+        params: { movieId: 'movie-1' },
+      });
     });
   });
 

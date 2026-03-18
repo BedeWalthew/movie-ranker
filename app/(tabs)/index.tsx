@@ -1,5 +1,7 @@
-import { View, Text, FlatList, Image, ActivityIndicator } from 'react-native';
-import { useEffect, useState, useCallback } from 'react';
+import { View, Text, FlatList, Image, ActivityIndicator, Pressable } from 'react-native';
+import { useState, useCallback } from 'react';
+import { useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { getDatabase } from '@/lib/database';
@@ -21,7 +23,7 @@ function StarRating({ rating, movieId }: { rating: number | null; movieId: strin
   );
 }
 
-function RankedMovieItem({ movie }: { movie: Movie }) {
+function RankedMovieItem({ movie, onRerank }: { movie: Movie; onRerank: (id: string) => void }) {
   return (
     <View
       testID={`ranked-item-${movie.id}`}
@@ -75,11 +77,23 @@ function RankedMovieItem({ movie }: { movie: Movie }) {
         </Text>
         <StarRating rating={movie.letterboxdRating} movieId={movie.id} />
       </View>
+      <Pressable
+        testID={`rerank-button-${movie.id}`}
+        onPress={() => onRerank(movie.id)}
+        style={{
+          padding: 8,
+          borderRadius: 8,
+          backgroundColor: theme.colors.surfaceLight,
+        }}
+      >
+        <Ionicons name="swap-vertical" size={20} color={theme.colors.primary} />
+      </Pressable>
     </View>
   );
 }
 
 export default function RankedScreen() {
+  const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -95,13 +109,22 @@ export default function RankedScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    loadMovies();
-  }, [loadMovies]);
+  useFocusEffect(
+    useCallback(() => {
+      loadMovies();
+    }, [loadMovies]),
+  );
+
+  const handleRerank = useCallback(
+    (movieId: string) => {
+      router.push(`/comparison?movieId=${movieId}&rerank=true`);
+    },
+    [router],
+  );
 
   const renderItem = useCallback(
-    ({ item }: { item: Movie }) => <RankedMovieItem movie={item} />,
-    [],
+    ({ item }: { item: Movie }) => <RankedMovieItem movie={item} onRerank={handleRerank} />,
+    [handleRerank],
   );
 
   const keyExtractor = useCallback((item: Movie) => item.id, []);

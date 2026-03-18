@@ -4,7 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { getDatabase } from '@/lib/database';
-import { getRankedMovies, insertMovieAtRank, getMovieById } from '@/lib/movieRepository';
+import { getRankedMovies, insertMovieAtRank, getMovieById, removeFromRanked } from '@/lib/movieRepository';
 import { resolveInsertionPosition, type ComparisonState } from '@/lib/binaryInsertion';
 import type { Movie } from '@/lib/schema';
 
@@ -78,7 +78,7 @@ function MovieCard({ movie, onPress, testIdPrefix }: { movie: Movie; onPress: ()
 
 export default function ComparisonScreen() {
   const router = useRouter();
-  const { movieId } = useLocalSearchParams<{ movieId: string }>();
+  const { movieId, rerank } = useLocalSearchParams<{ movieId: string; rerank?: string }>();
   const [state, setState] = useState<ComparisonState | null>(null);
   const [loading, setLoading] = useState(true);
   const [dbRef, setDbRef] = useState<any>(null);
@@ -87,16 +87,18 @@ export default function ComparisonScreen() {
     try {
       const db = await getDatabase();
       setDbRef(db);
-      const [ranked, movie] = await Promise.all([
-        getRankedMovies(db),
-        getMovieById(db, movieId),
-      ]);
 
+      const movie = await getMovieById(db, movieId);
       if (!movie) {
         router.back();
         return;
       }
 
+      if (rerank === 'true') {
+        await removeFromRanked(db, movieId);
+      }
+
+      const ranked = await getRankedMovies(db);
       const initial = resolveInsertionPosition(ranked, movie);
 
       if (initial.isComplete) {
@@ -111,7 +113,7 @@ export default function ComparisonScreen() {
     } finally {
       setLoading(false);
     }
-  }, [movieId, router]);
+  }, [movieId, rerank, router]);
 
   useEffect(() => {
     initialize();

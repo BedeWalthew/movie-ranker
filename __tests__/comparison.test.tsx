@@ -13,10 +13,12 @@ jest.mock('@/lib/database', () => ({
 const mockGetRankedMovies = jest.fn();
 const mockInsertMovieAtRank = jest.fn();
 const mockGetMovieById = jest.fn();
+const mockRemoveFromRanked = jest.fn();
 jest.mock('@/lib/movieRepository', () => ({
   getRankedMovies: (...args: any[]) => mockGetRankedMovies(...args),
   insertMovieAtRank: (...args: any[]) => mockInsertMovieAtRank(...args),
   getMovieById: (...args: any[]) => mockGetMovieById(...args),
+  removeFromRanked: (...args: any[]) => mockRemoveFromRanked(...args),
 }));
 
 // Mock expo-sqlite
@@ -24,9 +26,10 @@ jest.mock('expo-sqlite', () => ({}));
 
 // Mock expo-router
 const mockBack = jest.fn();
+const mockSearchParams: Record<string, string> = { movieId: 'new-movie' };
 jest.mock('expo-router', () => ({
   useRouter: () => ({ back: mockBack }),
-  useLocalSearchParams: () => ({ movieId: 'new-movie' }),
+  useLocalSearchParams: () => mockSearchParams,
 }));
 
 const rankedMovies: Movie[] = [
@@ -79,6 +82,10 @@ describe('ComparisonScreen', () => {
     const mockDb = {};
     mockGetDatabase.mockResolvedValue(mockDb);
     mockInsertMovieAtRank.mockResolvedValue(undefined);
+    mockRemoveFromRanked.mockResolvedValue(undefined);
+    // Reset search params to default
+    mockSearchParams.movieId = 'new-movie';
+    delete (mockSearchParams as any).rerank;
   });
 
   it('auto-inserts at rank 1 when ranked list is empty', async () => {
@@ -184,6 +191,133 @@ describe('ComparisonScreen', () => {
       // Comparison movie details
       expect(getByText('Parasite')).toBeTruthy();
       expect(getByText('2019')).toBeTruthy();
+    });
+  });
+
+  describe('re-ranking flow', () => {
+    const rerankMovie: Movie = {
+      id: 'r2',
+      title: 'Inception',
+      year: 2010,
+      letterboxdUri: 'https://letterboxd.com/film/inception/',
+      letterboxdRating: 4.5,
+      posterUrl: 'https://poster2.jpg',
+      director: 'Christopher Nolan',
+      rank: 2,
+    };
+
+    beforeEach(() => {
+      mockSearchParams.movieId = 'r2';
+      mockSearchParams.rerank = 'true';
+    });
+
+    it('calls removeFromRanked before getting ranked movies when rerank=true', async () => {
+      const callOrder: string[] = [];
+      mockGetMovieById.mockImplementation(async () => {
+        callOrder.push('getMovieById');
+        return rerankMovie;
+      });
+      mockRemoveFromRanked.mockImplementation(async () => {
+        callOrder.push('removeFromRanked');
+      });
+      mockGetRankedMovies.mockImplementation(async () => {
+        callOrder.push('getRankedMovies');
+        return [rankedMovies[0], rankedMovies[2]]; // r2 removed
+      });
+
+      render(<ComparisonScreen />);
+
+      await waitFor(() => {
+        expect(mockRemoveFromRanked).toHaveBeenCalledWith(expect.anything(), 'r2');
+      });
+
+      // Verify ordering: removeFromRanked always appears before getRankedMovies
+      const removeIdx = callOrder.indexOf('removeFromRanked');
+      const rankedIdx = callOrder.indexOf('getRankedMovies');
+      expect(removeIdx).toBeGreaterThan(-1);
+      expect(rankedIdx).toBeGreaterThan(removeIdx);
+    });
+
+    it('does not call removeFromRanked when rerank is not set', async () => {
+      delete (mockSearchParams as any).rerank;
+      mockSearchParams.movieId = 'new-movie';
+      mockGetRankedMovies.mockResolvedValue(rankedMovies);
+      mockGetMovieById.mockResolvedValue(newMovie);
+
+      render(<ComparisonScreen />);
+
+      await waitFor(() => {
+        expect(mockGetRankedMovies).toHaveBeenCalled();
+      });
+      expect(mockRemoveFromRanked).not.toHaveBeenCalled();
+    });
+
+    it('shows comparison UI after removing movie from ranked list', async () => {
+      mockGetMovieById.mockResolvedValue(rerankMovie);
+      // After removal, only Parasite and The Matrix remain
+      mockGetRankedMovies.mockResolvedValue([rankedMovies[0], rankedMovies[2]]);
+
+      const { getByText, getByTestId } = render(<ComparisonScreen />);
+
+      await waitFor(() => {
+        expect(getByText('Inception')).toBeTruthy();
+        expect(getByTestId('comparison-progress')).toBeTruthy();
+      });
+    });
+
+    it('completes re-ranking and inserts at new position', async () => {
+      mockGetMovieById.mockResolvedValue(rerankMovie);
+      // After removal, only Parasite remains
+      mockGetRankedMovies.mockResolvedValue([rankedMovies[0]]);
+
+      const { getByTestId } = render(<ComparisonScreen />);
+
+      await waitFor(() => {
+        expect(getByTestId('comparison-card-r2')).toBeTruthy();
+      });
+
+      // Prefer Inception over Parasite → inserted at rank 1
+      fireEvent.press(getByTestId('comparison-card-r2'));
+
+      await waitFor(() => {
+        expect(mockInsertMovieAtRank).toHaveBeenCalledWith(expect.anything(), 'r2', 1);
+        expect(mockBack).toHaveBeenCalled();
+      });
+    });
+
+    it('handles re-ranking when only one other movie remains (single comparison)', async () => {
+      mockGetMovieById.mockResolvedValue(rerankMovie);
+      // Only one other movie after removal
+      mockGetRankedMovies.mockResolvedValue([rankedMovies[0]]);
+
+      const { getByTestId } = render(<ComparisonScreen />);
+
+      await waitFor(() => {
+        expect(getByTestId('comparison-card-r2')).toBeTruthy();
+        expect(getByTestId('comparison-card-r1')).toBeTruthy();
+      });
+
+      // Prefer Parasite → Inception goes to rank 2
+      fireEvent.press(getByTestId('comparison-card-r1'));
+
+      await waitFor(() => {
+        expect(mockInsertMovieAtRank).toHaveBeenCalledWith(expect.anything(), 'r2', 2);
+        expect(mockBack).toHaveBeenCalled();
+      });
+    });
+
+    it('auto-inserts when no other ranked movies remain after removal', async () => {
+      mockGetMovieById.mockResolvedValue(rerankMovie);
+      // No movies left after removal
+      mockGetRankedMovies.mockResolvedValue([]);
+
+      render(<ComparisonScreen />);
+
+      await waitFor(() => {
+        expect(mockRemoveFromRanked).toHaveBeenCalledWith(expect.anything(), 'r2');
+        expect(mockInsertMovieAtRank).toHaveBeenCalledWith(expect.anything(), 'r2', 1);
+        expect(mockBack).toHaveBeenCalled();
+      });
     });
   });
 });
