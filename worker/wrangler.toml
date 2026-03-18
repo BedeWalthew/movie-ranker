@@ -1,0 +1,7 @@
+name = "movie-ranker-worker"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# TMDB_API_KEY is stored as a secret via `wrangler secret put TMDB_API_KEY`
