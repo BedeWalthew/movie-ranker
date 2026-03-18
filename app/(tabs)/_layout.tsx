@@ -1,12 +1,55 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, View, Text, Modal, SafeAreaView } from 'react-native';
+import { Pressable, View, Text, Modal, SafeAreaView, Alert } from 'react-native';
 import { useState } from 'react';
+import * as DocumentPicker from 'expo-document-picker';
 import { theme } from '@/lib/theme';
-import { TAB_NAMES, HEADER_MENU_ITEMS } from '@/lib/constants';
+import { TAB_NAMES, HEADER_MENU_ITEMS, WORKER_URL } from '@/lib/constants';
+import { getDatabase } from '@/lib/database';
+import { importMoviesFromCsv } from '@/lib/importService';
+
+async function handleImportCsv() {
+  try {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: 'text/csv',
+      copyToCacheDirectory: true,
+    });
+
+    if (result.canceled || !result.assets?.[0]) return;
+
+    const file = result.assets[0];
+    const response = await fetch(file.uri);
+    const csvContent = await response.text();
+
+    const db = await getDatabase();
+
+    const importResult = await importMoviesFromCsv(
+      db,
+      csvContent,
+      WORKER_URL,
+      (progress) => {
+        // Progress is available for UI updates if needed
+      },
+    );
+
+    Alert.alert(
+      'Import Complete',
+      `Imported ${importResult.imported} movies.\n${importResult.skipped} duplicates skipped.`,
+    );
+  } catch {
+    Alert.alert('Import Error', 'Failed to import CSV file.');
+  }
+}
 
 function HeaderMenu() {
   const [visible, setVisible] = useState(false);
+
+  const handleMenuPress = (item: string) => {
+    setVisible(false);
+    if (item === 'Import CSV') {
+      handleImportCsv();
+    }
+  };
 
   return (
     <>
@@ -43,7 +86,7 @@ function HeaderMenu() {
                 <Pressable
                   key={item}
                   testID={`menu-item-${item.toLowerCase().replace(' ', '-')}`}
-                  onPress={() => setVisible(false)}
+                  onPress={() => handleMenuPress(item)}
                   style={{ padding: 14 }}
                 >
                   <Text style={{ color: theme.colors.text, fontSize: 16 }}>{item}</Text>

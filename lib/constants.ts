@@ -4,3 +4,5 @@ export const TAB_NAMES = {
 } as const;
 
 export const HEADER_MENU_ITEMS = ['Import CSV', 'Settings'] as const;
+
+export const WORKER_URL = 'https://movie-ranker-worker.workers.dev';

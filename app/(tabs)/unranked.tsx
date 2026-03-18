@@ -1,26 +1,141 @@
-import { View, Text } from 'react-native';
+import { View, Text, FlatList, Image, ActivityIndicator } from 'react-native';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
+import { getDatabase } from '@/lib/database';
+import { getUnrankedMovies } from '@/lib/movieRepository';
+import type { Movie } from '@/lib/schema';
 
-export default function UnrankedScreen() {
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function StarRating({ rating, movieId }: { rating: number | null; movieId: string }) {
+  if (rating === null) return null;
+  const fullStars = Math.floor(rating);
+  const hasHalf = rating % 1 >= 0.5;
+
+  return (
+    <View testID={`movie-rating-${movieId}`} style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+      {Array.from({ length: fullStars }, (_, i) => (
+        <Ionicons key={`full-${i}`} name="star" size={14} color="#FFD700" />
+      ))}
+      {hasHalf && <Ionicons name="star-half" size={14} color="#FFD700" />}
+    </View>
+  );
+}
+
+function MovieItem({ movie }: { movie: Movie }) {
   return (
     <View
-      testID="unranked-screen"
+      testID={`movie-item-${movie.id}`}
       style={{
-        flex: 1,
-        backgroundColor: theme.colors.background,
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexDirection: 'row',
+        padding: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.surfaceLight,
       }}
     >
-      <Text
-        testID="unranked-placeholder"
-        style={{ color: theme.colors.text, fontSize: 18 }}
-      >
-        Unranked Movies
-      </Text>
-      <Text style={{ color: theme.colors.textSecondary, marginTop: 8 }}>
-        Your unranked movies will appear here
-      </Text>
+      {movie.posterUrl ? (
+        <Image
+          testID={`movie-poster-${movie.id}`}
+          source={{ uri: movie.posterUrl }}
+          style={{ width: 50, height: 75, borderRadius: 4 }}
+        />
+      ) : (
+        <View
+          testID={`movie-poster-placeholder-${movie.id}`}
+          style={{
+            width: 50,
+            height: 75,
+            borderRadius: 4,
+            backgroundColor: theme.colors.surfaceLight,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Ionicons name="film-outline" size={24} color={theme.colors.textSecondary} />
+        </View>
+      )}
+      <View style={{ marginLeft: 12, flex: 1, justifyContent: 'center' }}>
+        <Text style={{ color: theme.colors.text, fontSize: 16, fontWeight: '600' }}>
+          {movie.title}
+        </Text>
+        <Text style={{ color: theme.colors.textSecondary, fontSize: 13, marginTop: 2 }}>
+          {movie.year}
+        </Text>
+        <StarRating rating={movie.letterboxdRating} movieId={movie.id} />
+      </View>
+    </View>
+  );
+}
+
+export default function UnrankedScreen() {
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadMovies = useCallback(async () => {
+    try {
+      const db = await getDatabase();
+      const unranked = await getUnrankedMovies(db);
+      setMovies(shuffleArray(unranked));
+    } catch {
+      // silently handle errors
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadMovies();
+  }, [loadMovies]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: Movie }) => <MovieItem movie={item} />,
+    [],
+  );
+
+  const keyExtractor = useCallback((item: Movie) => item.id, []);
+
+  if (loading) {
+    return (
+      <View testID="unranked-screen" style={{ flex: 1, backgroundColor: theme.colors.background, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  if (movies.length === 0) {
+    return (
+      <View testID="unranked-screen" style={{ flex: 1, backgroundColor: theme.colors.background, alignItems: 'center', justifyContent: 'center' }}>
+        <View testID="unranked-empty">
+          <Text style={{ color: theme.colors.text, fontSize: 18, textAlign: 'center' }}>
+            Unranked Movies
+          </Text>
+          <Text style={{ color: theme.colors.textSecondary, marginTop: 8, textAlign: 'center' }}>
+            Import a CSV to add movies
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View testID="unranked-screen" style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <FlatList
+        testID="movie-list"
+        data={movies}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        initialNumToRender={15}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+      />
     </View>
   );
 }

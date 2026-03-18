@@ -3,6 +3,19 @@ import { render, screen } from '@testing-library/react-native';
 import RankedScreen from '@/app/(tabs)/index';
 import UnrankedScreen from '@/app/(tabs)/unranked';
 
+// Mock database and repository for UnrankedScreen
+const mockGetDatabase = jest.fn().mockResolvedValue({});
+jest.mock('@/lib/database', () => ({
+  getDatabase: () => mockGetDatabase(),
+}));
+
+const mockGetUnrankedMovies = jest.fn().mockResolvedValue([]);
+jest.mock('@/lib/movieRepository', () => ({
+  getUnrankedMovies: (...args: any[]) => mockGetUnrankedMovies(...args),
+}));
+
+jest.mock('expo-sqlite', () => ({}));
+
 describe('Screen Components', () => {
   describe('RankedScreen', () => {
     it('should render with ranked-screen testID', () => {
@@ -33,9 +46,10 @@ describe('Screen Components', () => {
       expect(screen.getByTestId('unranked-screen')).toBeTruthy();
     });
 
-    it('should display placeholder text', () => {
+    it('should display empty state text when no movies', async () => {
       render(<UnrankedScreen />);
-      expect(screen.getByTestId('unranked-placeholder')).toBeTruthy();
+      const emptyState = await screen.findByTestId('unranked-empty');
+      expect(emptyState).toBeTruthy();
       expect(screen.getByText('Unranked Movies')).toBeTruthy();
     });
 
