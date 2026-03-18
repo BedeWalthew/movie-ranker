@@ -47,11 +47,16 @@ function HeaderMenu() {
 
   const handleMenuPress = (item: string) => {
     setVisible(false);
-    if (item === 'Import CSV') {
-      handleImportCsv();
-    } else if (item === 'Share Top 10') {
-      router.push('/share');
-    }
+    // Delay to let the menu modal finish dismissing before presenting
+    // another modal (document picker / navigation). iOS cannot present
+    // two view controllers simultaneously.
+    setTimeout(() => {
+      if (item === 'Import CSV') {
+        handleImportCsv();
+      } else if (item === 'Share Top 10') {
+        router.push('/share');
+      }
+    }, 350);
   };
 
   return (
