@@ -62,7 +62,7 @@ export function ImportOverlay({ state, onDismiss }: { state: ImportState; onDism
               {state.phase === "failed" && "Import failed"}
             </Text>
 
-            {state.phase === "fetching" || state.phase === "done" ? (
+            {state.phase === "fetching" || (state.phase === "done" && state.total > 0) ? (
               <View style={styles.countRow}>
                 <CountdownNumeral value={state.current} size="md" testID="import-count" />
                 <Text style={styles.of}>of {state.total}</Text>
@@ -81,8 +81,10 @@ export function ImportOverlay({ state, onDismiss }: { state: ImportState; onDism
               {state.phase === "reading" && "Finding the films you have not imported yet."}
               {state.phase === "fetching" && (state.latestTitle ?? "Fetching posters and directors.")}
               {state.phase === "done" &&
-                `${state.imported} ${state.imported === 1 ? "film" : "films"} added to the unranked reel.` +
-                  (state.skipped > 0 ? ` ${state.skipped} already in your list were skipped.` : "")}
+                (state.imported === 0
+                  ? `Nothing new to add. ${state.skipped === 1 ? "The 1 film in that export is" : `All ${state.skipped} films in that export are`} already in your list.`
+                  : `${state.imported} ${state.imported === 1 ? "film" : "films"} added to the unranked reel.` +
+                    (state.skipped > 0 ? ` ${state.skipped} already in your list were skipped.` : ""))}
               {state.phase === "failed" && (state.error ?? "The file could not be read as a Letterboxd export.")}
             </Text>
 
@@ -93,7 +95,7 @@ export function ImportOverlay({ state, onDismiss }: { state: ImportState; onDism
                 testID="import-done"
                 style={({ pressed }) => [styles.button, pressed && { backgroundColor: theme.colors.primaryPressed }]}
               >
-                <Text style={styles.buttonLabel}>{state.phase === "done" ? "Start ranking" : "Close"}</Text>
+                <Text style={styles.buttonLabel}>{state.phase === "done" && state.imported > 0 ? "Start ranking" : "Close"}</Text>
               </Pressable>
             ) : (
               <Text style={styles.hint}>Keep the app open. Posters arrive a few at a time.</Text>
