@@ -2,10 +2,12 @@ import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { theme } from "@/lib/theme";
 import { TAB_NAMES } from "@/lib/constants";
 import { RefreshProvider } from "@/lib/refreshContext";
+import { ImportProvider } from "@/lib/importContext";
 
 export default function TabLayout() {
   return (
     <RefreshProvider>
+      <ImportProvider>
       <NativeTabs
         tintColor={theme.colors.primary}
         backgroundColor={theme.colors.tabBar}
@@ -24,6 +26,7 @@ export default function TabLayout() {
           <NativeTabs.Trigger.Label>{TAB_NAMES.unranked}</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
       </NativeTabs>
+      </ImportProvider>
     </RefreshProvider>
   );
 }

@@ -3,11 +3,11 @@ import { useRouter } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import { theme } from "@/lib/theme";
 import { Icon } from "@/lib/components/Icon";
-import { HEADER_MENU_ITEMS, WORKER_URL } from "@/lib/constants";
+import { HEADER_MENU_ITEMS } from "@/lib/constants";
 import { getDatabase } from "@/lib/database";
-import { importMoviesFromCsv } from "@/lib/importService";
 import { deleteAllMovies } from "@/lib/movieRepository";
 import { useRefresh } from "@/lib/refreshContext";
+import { useImport } from "@/lib/importContext";
 
 /**
  * The ellipsis in the navigation bar. Opens the system action sheet with
@@ -16,6 +16,7 @@ import { useRefresh } from "@/lib/refreshContext";
 export function HeaderMenu() {
   const router = useRouter();
   const { triggerRefresh } = useRefresh();
+  const { startImport } = useImport();
 
   const importCsv = async () => {
     try {
@@ -28,18 +29,12 @@ export function HeaderMenu() {
       const file = result.assets[0];
       const response = await fetch(file.uri);
       const csvContent = await response.text();
-      const db = await getDatabase();
-      const importResult = await importMoviesFromCsv(db, csvContent, WORKER_URL, () => {});
-      triggerRefresh();
-      Alert.alert(
-        "Import complete",
-        `${importResult.imported} films added to the unranked reel.` +
-          (importResult.skipped > 0 ? `\n${importResult.skipped} already in your list were skipped.` : ""),
-      );
+      // The reel-loading sheet takes over from here.
+      await startImport(csvContent);
     } catch (error) {
       Alert.alert(
         "Import failed",
-        `The file could not be read as a Letterboxd export.\n${error instanceof Error ? error.message : String(error)}`,
+        `The file could not be opened.\n${error instanceof Error ? error.message : String(error)}`,
       );
     }
   };

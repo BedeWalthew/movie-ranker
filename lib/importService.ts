@@ -8,6 +8,8 @@ import type { Movie } from './schema';
 export interface ImportProgress {
   current: number;
   total: number;
+  /** The film just added, for progress UI. */
+  title?: string;
 }
 
 export interface ImportResult {
@@ -68,7 +70,7 @@ export async function importMoviesFromCsv(
     await insertMovie(db, movie);
     imported++;
 
-    onProgress?.({ current: imported, total: newEntries.length });
+    onProgress?.({ current: imported, total: newEntries.length, title: entry.title });
 
     // Throttle: pause between batches to avoid rate limiting
     if ((i + 1) % BATCH_SIZE === 0 && i + 1 < newEntries.length) {
