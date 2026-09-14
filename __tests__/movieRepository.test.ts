@@ -8,6 +8,7 @@ import {
   getRankedMovies,
   insertMovieAtRank,
   removeFromRanked,
+  moveMovieToRank,
   deleteAllMovies,
 } from '@/lib/movieRepository';
 import type { Movie } from '@/lib/schema';
@@ -16,11 +17,13 @@ import type { Movie } from '@/lib/schema';
 const mockRunAsync = jest.fn();
 const mockGetAllAsync = jest.fn();
 const mockGetFirstAsync = jest.fn();
+const mockWithTransactionAsync = jest.fn(async (task: () => Promise<void>) => task());
 
 const mockDb = {
   runAsync: mockRunAsync,
   getAllAsync: mockGetAllAsync,
   getFirstAsync: mockGetFirstAsync,
+  withTransactionAsync: mockWithTransactionAsync,
 } as any;
 
 describe('movieRepository', () => {
@@ -363,6 +366,41 @@ describe('movieRepository', () => {
       await removeFromRanked(mockDb, 'movie-id');
 
       expect(mockRunAsync).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('moveMovieToRank', () => {
+    it('removes and re-inserts the movie inside one transaction', async () => {
+      let callsAtBegin = -1;
+      let callsAtCommit = -1;
+      mockWithTransactionAsync.mockImplementationOnce(async (task: () => Promise<void>) => {
+        callsAtBegin = mockRunAsync.mock.calls.length;
+        await task();
+        callsAtCommit = mockRunAsync.mock.calls.length;
+      });
+      mockGetFirstAsync.mockResolvedValueOnce({
+        id: 'movie-id',
+        title: 'Test',
+        year: 2020,
+        letterboxdUri: 'https://letterboxd.com/film/test/',
+        letterboxdRating: null,
+        posterUrl: null,
+        director: null,
+        rank: 5,
+      });
+      mockRunAsync.mockResolvedValue(undefined);
+
+      await moveMovieToRank(mockDb, 'movie-id', 2);
+
+      expect(callsAtBegin).toBe(0);
+      expect(callsAtCommit).toBe(4);
+      expect(mockRunAsync.mock.calls.map(([sql]) => sql)).toEqual([
+        expect.stringContaining('SET rank = NULL'),
+        expect.stringContaining('SET rank = rank - 1'),
+        expect.stringContaining('SET rank = rank + 1'),
+        expect.stringContaining('SET rank = ?'),
+      ]);
+      expect(mockRunAsync).toHaveBeenLastCalledWith(expect.any(String), [2, 'movie-id']);
     });
   });
 

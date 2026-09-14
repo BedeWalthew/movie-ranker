@@ -94,6 +94,19 @@ export async function removeFromRanked(
   );
 }
 
+export async function moveMovieToRank(
+  db: SQLiteDatabase,
+  movieId: string,
+  position: number,
+): Promise<void> {
+  // position is relative to the ranked list without this movie, which is
+  // exactly the list after removeFromRanked closes the gap.
+  await db.withTransactionAsync(async () => {
+    await removeFromRanked(db, movieId);
+    await insertMovieAtRank(db, movieId, position);
+  });
+}
+
 export async function deleteAllMovies(db: SQLiteDatabase): Promise<void> {
   await db.runAsync('DELETE FROM movies');
 }

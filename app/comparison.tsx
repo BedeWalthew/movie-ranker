@@ -4,17 +4,28 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/lib/theme";
 import { getDatabase } from "@/lib/database";
+import type { SQLiteDatabase } from "expo-sqlite";
 import {
   getRankedMovies,
   insertMovieAtRank,
   getMovieById,
-  removeFromRanked,
+  moveMovieToRank,
 } from "@/lib/movieRepository";
 import {
   resolveInsertionPosition,
   type ComparisonState,
 } from "@/lib/binaryInsertion";
 import type { Movie } from "@/lib/schema";
+
+// A movie that's already ranked keeps its rank until the new position is
+// known, so abandoning a re-rank (e.g. swiping the modal away) changes nothing.
+async function placeMovie(db: SQLiteDatabase, movie: Movie, position: number) {
+  if (movie.rank !== null) {
+    await moveMovieToRank(db, movie.id, position);
+  } else {
+    await insertMovieAtRank(db, movie.id, position);
+  }
+}
 
 function StarRating({ rating }: { rating: number | null }) {
   if (rating === null) return null;
@@ -104,10 +115,7 @@ function MovieCard({
 
 export default function ComparisonScreen() {
   const router = useRouter();
-  const { movieId, rerank } = useLocalSearchParams<{
-    movieId: string;
-    rerank?: string;
-  }>();
+  const { movieId } = useLocalSearchParams<{ movieId: string }>();
   const [state, setState] = useState<ComparisonState | null>(null);
   const [loading, setLoading] = useState(true);
   const [dbRef, setDbRef] = useState<any>(null);
@@ -123,15 +131,15 @@ export default function ComparisonScreen() {
         return;
       }
 
-      if (rerank === "true") {
-        await removeFromRanked(db, movieId);
-      }
-
-      const ranked = await getRankedMovies(db);
+      // Compare against every other ranked movie; a movie being re-ranked is
+      // left out of the comparisons but keeps its rank until placeMovie runs.
+      const ranked = (await getRankedMovies(db)).filter(
+        (m) => m.id !== movieId,
+      );
       const initial = resolveInsertionPosition(ranked, movie);
 
       if (initial.isComplete) {
-        await insertMovieAtRank(db, movieId, initial.insertionPosition!);
+        await placeMovie(db, movie, initial.insertionPosition!);
         router.back();
         return;
       }
@@ -142,7 +150,7 @@ export default function ComparisonScreen() {
     } finally {
       setLoading(false);
     }
-  }, [movieId, rerank, router]);
+  }, [movieId, router]);
 
   useEffect(() => {
     initialize();
@@ -156,7 +164,7 @@ export default function ComparisonScreen() {
 
       if (next.isComplete) {
         try {
-          await insertMovieAtRank(dbRef, movieId, next.insertionPosition!);
+          await placeMovie(dbRef, state.movieToRank, next.insertionPosition!);
         } finally {
           router.back();
         }
@@ -165,7 +173,7 @@ export default function ComparisonScreen() {
 
       setState(next);
     },
-    [state, dbRef, movieId, router],
+    [state, dbRef, router],
   );
 
   if (loading || !state) {
