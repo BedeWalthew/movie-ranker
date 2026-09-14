@@ -1,99 +1,127 @@
-import { View, Text, FlatList, Image, ActivityIndicator, Pressable } from 'react-native';
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { useRouter } from 'expo-router';
-import { useFocusEffect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/lib/theme';
-import { getDatabase } from '@/lib/database';
-import { getRankedMovies, getRandomUnrankedMovie } from '@/lib/movieRepository';
-import { applyFilters } from '@/lib/movieFilters';
-import { SearchFilterBar } from '@/lib/components/SearchFilterBar';
-import { RankNudgeCard } from '@/lib/components/RankNudgeCard';
-import { useRefresh } from '@/lib/refreshContext';
-import type { Movie } from '@/lib/schema';
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  ActivityIndicator,
+  Pressable,
+} from "react-native";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useRouter } from "expo-router";
+import { useFocusEffect } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { theme } from "@/lib/theme";
+import { getDatabase } from "@/lib/database";
+import { getRankedMovies, getRandomUnrankedMovie } from "@/lib/movieRepository";
+import { applyFilters } from "@/lib/movieFilters";
+import { SearchFilterBar } from "@/lib/components/SearchFilterBar";
+import { RankNudgeCard } from "@/lib/components/RankNudgeCard";
+import { useRefresh } from "@/lib/refreshContext";
+import type { Movie } from "@/lib/schema";
 
-function StarRating({ rating, movieId }: { rating: number | null; movieId: string }) {
+function StarRating({
+  rating,
+  movieId,
+}: {
+  rating: number | null;
+  movieId: string;
+}) {
   if (rating === null) return null;
   const fullStars = Math.floor(rating);
   const hasHalf = rating % 1 >= 0.5;
 
   return (
-    <View testID={`ranked-rating-${movieId}`} style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+    <View
+      testID={`ranked-rating-${movieId}`}
+      style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}
+    >
       {Array.from({ length: fullStars }, (_, i) => (
-        <Ionicons key={`full-${i}`} name="star" size={14} color="#FFD700" />
+        <Ionicons key={`full-${i}`} name="star" size={14} color="#93C2FB" />
       ))}
-      {hasHalf && <Ionicons name="star-half" size={14} color="#FFD700" />}
+      {hasHalf && <Ionicons name="star-half" size={14} color="#93C2FB" />}
     </View>
   );
 }
 
-function RankedMovieItem({ movie, onRerank, onPress }: { movie: Movie; onRerank: (id: string) => void; onPress: () => void }) {
+function RankedMovieItem({
+  movie,
+  onRerank,
+  onPress,
+}: {
+  movie: Movie;
+  onRerank: (id: string) => void;
+  onPress: () => void;
+}) {
   return (
     <Pressable onPress={onPress}>
-    <View
-      testID={`ranked-item-${movie.id}`}
-      style={{
-        flexDirection: 'row',
-        padding: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: theme.colors.surfaceLight,
-        alignItems: 'center',
-      }}
-    >
-      <Text
-        testID={`ranked-number-${movie.id}`}
+      <View
+        testID={`ranked-item-${movie.id}`}
         style={{
-          color: theme.colors.primary,
-          fontSize: 18,
-          fontWeight: '700',
-          width: 36,
-          textAlign: 'center',
+          flexDirection: "row",
+          justifyContent: "center",
+          paddingVertical: 16,
+          paddingHorizontal: 12,
+          borderBottomWidth: 1,
+          borderBottomColor: theme.colors.surfaceLight,
+          alignItems: "center",
+          gap: 16,
         }}
       >
-        {movie.rank}
-      </Text>
-      {movie.posterUrl ? (
-        <Image
-          testID={`ranked-poster-${movie.id}`}
-          source={{ uri: movie.posterUrl }}
-          style={{ width: 40, height: 60, borderRadius: 4 }}
-        />
-      ) : (
-        <View
-          testID={`ranked-poster-placeholder-${movie.id}`}
-          style={{
-            width: 40,
-            height: 60,
-            borderRadius: 4,
-            backgroundColor: theme.colors.surfaceLight,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Ionicons name="film-outline" size={20} color={theme.colors.textSecondary} />
+        {/* rank + rerank button */}
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Text
+            testID={`ranked-number-${movie.id}`}
+            style={{
+              color: theme.colors.primary,
+              fontSize: 32,
+              fontWeight: "900",
+              lineHeight: 36,
+            }}
+          >
+            {movie.rank}
+          </Text>
+          {/* <Pressable
+            testID={`rerank-button-${movie.id}`}
+            onPress={() => onRerank(movie.id)}
+            style={{
+              padding: 4,
+              borderRadius: 6,
+              backgroundColor: theme.colors.surfaceLight,
+            }}
+          >
+            <Ionicons name="swap-vertical" size={14} color={theme.colors.primary} />
+          </Pressable> */}
         </View>
-      )}
-      <View style={{ marginLeft: 12, flex: 1, justifyContent: 'center' }}>
-        <Text style={{ color: theme.colors.text, fontSize: 16, fontWeight: '600' }}>
-          {movie.title}
-        </Text>
-        <Text style={{ color: theme.colors.textSecondary, fontSize: 13, marginTop: 2 }}>
-          {movie.year}{movie.director ? ` · ${movie.director}` : ''}
-        </Text>
-        <StarRating rating={movie.letterboxdRating} movieId={movie.id} />
+
+        {/* poster */}
+        <View>
+          {movie.posterUrl ? (
+            <Image
+              testID={`ranked-poster-${movie.id}`}
+              source={{ uri: movie.posterUrl }}
+              style={{ width: 160, height: 240, borderRadius: 10 }}
+            />
+          ) : (
+            <View
+              testID={`ranked-poster-placeholder-${movie.id}`}
+              style={{
+                width: 160,
+                height: 240,
+                borderRadius: 10,
+                backgroundColor: theme.colors.surfaceLight,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons
+                name="film-outline"
+                size={64}
+                color={theme.colors.textSecondary}
+              />
+            </View>
+          )}
+        </View>
       </View>
-      <Pressable
-        testID={`rerank-button-${movie.id}`}
-        onPress={() => onRerank(movie.id)}
-        style={{
-          padding: 8,
-          borderRadius: 8,
-          backgroundColor: theme.colors.surfaceLight,
-        }}
-      >
-        <Ionicons name="swap-vertical" size={20} color={theme.colors.primary} />
-      </Pressable>
-    </View>
     </Pressable>
   );
 }
@@ -103,7 +131,7 @@ export default function RankedScreen() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [nudgeMovie, setNudgeMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [minRating, setMinRating] = useState<number | null>(null);
   const { refreshKey } = useRefresh();
 
@@ -154,7 +182,10 @@ export default function RankedScreen() {
 
   const handleNudgePress = useCallback(() => {
     if (nudgeMovie) {
-      router.push({ pathname: '/comparison', params: { movieId: nudgeMovie.id } });
+      router.push({
+        pathname: "/comparison",
+        params: { movieId: nudgeMovie.id },
+      });
     }
   }, [nudgeMovie, router]);
 
@@ -173,7 +204,15 @@ export default function RankedScreen() {
 
   if (loading) {
     return (
-      <View testID="ranked-screen" style={{ flex: 1, backgroundColor: theme.colors.background, alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        testID="ranked-screen"
+        style={{
+          flex: 1,
+          backgroundColor: theme.colors.background,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
@@ -181,16 +220,36 @@ export default function RankedScreen() {
 
   if (movies.length === 0) {
     return (
-      <View testID="ranked-screen" style={{ flex: 1, backgroundColor: theme.colors.background, alignItems: 'center', justifyContent: 'center' }}>
-        {nudgeMovie && <RankNudgeCard movie={nudgeMovie} onPress={handleNudgePress} />}
-        <Text testID="ranked-placeholder" style={{ color: theme.colors.text, fontSize: 18 }}>Ranked Movies</Text>
-        <Text style={{ color: theme.colors.textSecondary, marginTop: 8 }}>Your ranked movies will appear here</Text>
+      <View
+        testID="ranked-screen"
+        style={{
+          flex: 1,
+          backgroundColor: theme.colors.background,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {nudgeMovie && (
+          <RankNudgeCard movie={nudgeMovie} onPress={handleNudgePress} />
+        )}
+        <Text
+          testID="ranked-placeholder"
+          style={{ color: theme.colors.text, fontSize: 18 }}
+        >
+          Ranked Movies
+        </Text>
+        <Text style={{ color: theme.colors.textSecondary, marginTop: 8 }}>
+          Your ranked movies will appear here
+        </Text>
       </View>
     );
   }
 
   return (
-    <View testID="ranked-screen" style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <View
+      testID="ranked-screen"
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+    >
       <SearchFilterBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -202,7 +261,7 @@ export default function RankedScreen() {
         data={filteredMovies}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        ListHeaderComponent={
+        ListFooterComponent={
           nudgeMovie ? (
             <RankNudgeCard movie={nudgeMovie} onPress={handleNudgePress} />
           ) : null
