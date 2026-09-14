@@ -7,9 +7,12 @@ import { theme } from "@/lib/theme";
 import { getDatabase } from "@/lib/database";
 import type { SQLiteDatabase } from "expo-sqlite";
 import { getRankedMovies, insertMovieAtRank, getMovieById, moveMovieToRank } from "@/lib/movieRepository";
+import { getRankMode, setRankMode, type RankMode } from "@/lib/settingsRepository";
 import { resolveInsertionPosition, type ComparisonState } from "@/lib/binaryInsertion";
+import { describeSlot, initialSlotGap } from "@/lib/slotInsertion";
 import { Poster } from "@/lib/components/Poster";
 import { SprocketRail, RAIL_WIDTH } from "@/lib/components/SprocketRail";
+import { SlotReel, SLOT_REEL_W } from "@/lib/components/SlotReel";
 import { CountdownNumeral } from "@/lib/components/CountdownNumeral";
 import { Icon } from "@/lib/components/Icon";
 import type { Movie } from "@/lib/schema";
@@ -25,6 +28,40 @@ async function placeMovie(db: SQLiteDatabase, movie: Movie, position: number) {
 }
 
 const LIT_MS = 180;
+const ARROW_W = 40;
+
+const MODES: { value: RankMode; label: string; hint: string }[] = [
+  { value: "pick", label: "Pick", hint: "Pick mode: choose between two films" },
+  { value: "slot", label: "Slot", hint: "Slot mode: scroll the reel to the gap it belongs in" },
+];
+
+function ModeSwitch({ mode, onChange }: { mode: RankMode; onChange: (mode: RankMode) => void }) {
+  return (
+    <View style={styles.modeSwitch}>
+      {MODES.map(({ value, label, hint }) => {
+        const selected = mode === value;
+        return (
+          <Pressable
+            key={value}
+            testID={`rank-mode-${value}`}
+            onPress={() => onChange(value)}
+            hitSlop={{ top: 6, bottom: 6 }}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+            accessibilityLabel={hint}
+            style={({ pressed }) => [
+              styles.modeOption,
+              selected && styles.modeOptionSelected,
+              pressed && !selected && { opacity: 0.7 },
+            ]}
+          >
+            <Text style={[styles.modeLabel, selected && styles.modeLabelSelected]}>{label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
 
 function Frame({
   movie,
@@ -80,11 +117,80 @@ function Frame({
   );
 }
 
+/**
+ * The film to place waits on the left, pointing at the gate; the ranked
+ * films scroll past on the right until the gap it belongs in lines up.
+ */
+function SlotMode({
+  movie,
+  ranked,
+  gap,
+  onFocusGap,
+  onPlace,
+  screenW,
+}: {
+  movie: Movie;
+  ranked: Movie[];
+  gap: number;
+  onFocusGap: (gap: number) => void;
+  onPlace: () => void;
+  screenW: number;
+}) {
+  const contentW = screenW - (RAIL_WIDTH + 16) * 2;
+  const posterW = Math.min(150, contentW - ARROW_W - SLOT_REEL_W);
+  const posterH = Math.round(posterW * 1.5);
+  const rank = gap + 1;
+
+  return (
+    <>
+      <View style={styles.header}>
+        <Text style={styles.heading}>Where does it go?</Text>
+      </View>
+
+      <View style={styles.slotBody}>
+        <View style={{ width: posterW, height: posterH }}>
+          <Poster uri={movie.posterUrl} width={posterW} height={posterH} />
+          <View pointerEvents="none" style={styles.slotRim} />
+          <View style={[styles.slotLabel, { top: posterH + 14 }]}>
+            <Text style={styles.slotTitle} numberOfLines={2}>
+              {movie.title}
+            </Text>
+            <Text style={styles.year}>{movie.year}</Text>
+          </View>
+        </View>
+        <View pointerEvents="none" style={[styles.arrow, { width: ARROW_W }]}>
+          <View style={styles.arrowLine} />
+          <Icon name="arrowtriangle.right.fill" size={10} color={theme.colors.lamp} />
+        </View>
+        <SlotReel testID="slot-reel" movies={ranked} initialGap={gap} onFocusGap={onFocusGap} />
+      </View>
+
+      <View style={styles.slotFooter}>
+        <Pressable
+          testID="slot-place-button"
+          onPress={onPlace}
+          accessibilityRole="button"
+          accessibilityLabel={`Place ${movie.title} at number ${rank}`}
+          style={({ pressed }) => [styles.placeButton, pressed && { backgroundColor: theme.colors.primaryPressed }]}
+        >
+          <Text style={styles.placeLabel}>{`Place at #${rank}`}</Text>
+        </Pressable>
+        <Text testID="slot-hint" style={styles.slotHint} numberOfLines={2}>
+          {`${describeSlot(ranked, gap)}. Leaving now changes nothing.`}
+        </Text>
+      </View>
+    </>
+  );
+}
+
 export default function ComparisonScreen() {
   const router = useRouter();
   const { width: screenW } = useWindowDimensions();
   const { movieId } = useLocalSearchParams<{ movieId: string }>();
   const [state, setState] = useState<ComparisonState | null>(null);
+  const [ranked, setRanked] = useState<Movie[]>([]);
+  const [mode, setMode] = useState<RankMode>("pick");
+  const [slotGap, setSlotGap] = useState(0);
   const [loading, setLoading] = useState(true);
   const [litId, setLitId] = useState<string | null>(null);
   const dbRef = useRef<SQLiteDatabase | null>(null);
@@ -95,7 +201,12 @@ export default function ComparisonScreen() {
       const db = await getDatabase();
       dbRef.current = db;
 
-      const movie = await getMovieById(db, movieId);
+      const [movie, allRanked, savedMode] = await Promise.all([
+        getMovieById(db, movieId),
+        getRankedMovies(db),
+        // A lost preference is no reason to stop ranking.
+        getRankMode(db).catch((): RankMode => "pick"),
+      ]);
       if (!movie) {
         router.back();
         return;
@@ -103,8 +214,8 @@ export default function ComparisonScreen() {
 
       // Compare against every other ranked movie; a movie being re-ranked is
       // left out of the comparisons but keeps its rank until placeMovie runs.
-      const ranked = (await getRankedMovies(db)).filter((m) => m.id !== movieId);
-      const initial = resolveInsertionPosition(ranked, movie);
+      const others = allRanked.filter((m) => m.id !== movieId);
+      const initial = resolveInsertionPosition(others, movie);
 
       if (initial.isComplete) {
         await placeMovie(db, movie, initial.insertionPosition!);
@@ -112,6 +223,9 @@ export default function ComparisonScreen() {
         return;
       }
 
+      setRanked(others);
+      setSlotGap(initialSlotGap(others.length, movie.rank));
+      setMode(savedMode);
       setState(initial);
     } catch {
       router.back();
@@ -123,6 +237,11 @@ export default function ComparisonScreen() {
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  const chooseMode = useCallback((next: RankMode) => {
+    setMode(next);
+    if (dbRef.current) setRankMode(dbRef.current, next).catch(() => {});
+  }, []);
 
   const handlePick = useCallback(
     async (preferredId: string) => {
@@ -151,6 +270,17 @@ export default function ComparisonScreen() {
     [state, router],
   );
 
+  const handlePlace = useCallback(async () => {
+    if (!state || busy.current) return;
+    busy.current = true;
+    try {
+      if (dbRef.current) await placeMovie(dbRef.current, state.movieToRank, slotGap + 1);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    } finally {
+      router.back();
+    }
+  }, [state, slotGap, router]);
+
   if (loading || !state) {
     return (
       <View testID="comparison-screen" style={styles.centered}>
@@ -176,37 +306,51 @@ export default function ComparisonScreen() {
       >
         <Icon name="xmark" size={16} color={theme.colors.textSecondary} />
       </Pressable>
+      <ModeSwitch mode={mode} onChange={chooseMode} />
 
-      <View style={styles.header}>
-        <Text style={styles.heading}>Which do you prefer?</Text>
-        <View style={styles.progress}>
-          <CountdownNumeral value={state.comparisonNumber} size="sm" />
-          <Text testID="comparison-progress" style={styles.progressText}>
-            of about {state.estimatedTotal}
-          </Text>
-        </View>
-      </View>
-
-      <View style={[styles.frames, { gap }]}>
-        <Frame
+      {mode === "slot" ? (
+        <SlotMode
           movie={state.movieToRank}
-          width={frameW}
-          lit={litId === state.movieToRank.id}
-          dimmed={litId !== null && litId !== state.movieToRank.id}
-          onPick={() => handlePick(state.movieToRank.id)}
+          ranked={ranked}
+          gap={slotGap}
+          onFocusGap={setSlotGap}
+          onPlace={handlePlace}
+          screenW={screenW}
         />
-        <Frame
-          movie={state.comparisonMovie!}
-          width={frameW}
-          lit={litId === state.comparisonMovie!.id}
-          dimmed={litId !== null && litId !== state.comparisonMovie!.id}
-          onPick={() => handlePick(state.comparisonMovie!.id)}
-        />
-      </View>
+      ) : (
+        <>
+          <View style={styles.header}>
+            <Text style={styles.heading}>Which do you prefer?</Text>
+            <View style={styles.progress}>
+              <CountdownNumeral value={state.comparisonNumber} size="sm" />
+              <Text testID="comparison-progress" style={styles.progressText}>
+                of about {state.estimatedTotal}
+              </Text>
+            </View>
+          </View>
 
-      <Text style={styles.hint}>
-        Tap the film you liked more. Leaving now changes nothing.
-      </Text>
+          <View style={[styles.frames, { gap }]}>
+            <Frame
+              movie={state.movieToRank}
+              width={frameW}
+              lit={litId === state.movieToRank.id}
+              dimmed={litId !== null && litId !== state.movieToRank.id}
+              onPick={() => handlePick(state.movieToRank.id)}
+            />
+            <Frame
+              movie={state.comparisonMovie!}
+              width={frameW}
+              lit={litId === state.comparisonMovie!.id}
+              dimmed={litId !== null && litId !== state.comparisonMovie!.id}
+              onPick={() => handlePick(state.comparisonMovie!.id)}
+            />
+          </View>
+
+          <Text style={styles.hint}>
+            Tap the film you liked more. Leaving now changes nothing.
+          </Text>
+        </>
+      )}
     </View>
   );
 }
@@ -238,9 +382,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     zIndex: 1,
   },
+  modeSwitch: {
+    alignSelf: "center",
+    flexDirection: "row",
+    marginTop: 5,
+    height: 32,
+    padding: 2,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: "rgba(200,128,30,0.45)",
+  },
+  modeOption: {
+    minWidth: 64,
+    paddingHorizontal: 14,
+    borderRadius: theme.radius.pill,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modeOptionSelected: { backgroundColor: theme.colors.primary },
+  modeLabel: {
+    fontFamily: theme.fonts.displayBold,
+    fontSize: 15,
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+    color: theme.colors.primary,
+    includeFontPadding: false,
+  },
+  modeLabelSelected: { color: theme.colors.onPrimary },
   header: {
     alignItems: "center",
-    paddingTop: 44,
+    paddingTop: 12,
     paddingHorizontal: RAIL_WIDTH + 16,
     gap: 14,
   },
@@ -297,5 +468,67 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: RAIL_WIDTH + 32,
     paddingBottom: 48,
+  },
+  slotBody: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 16,
+    paddingHorizontal: RAIL_WIDTH + 16,
+  },
+  slotRim: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: theme.radius.frame,
+    borderWidth: 1,
+    borderColor: "rgba(244,227,178,0.55)",
+  },
+  slotLabel: { position: "absolute", left: 0, right: 0 },
+  slotTitle: {
+    fontFamily: theme.fonts.displayBold,
+    fontSize: 20,
+    lineHeight: 21,
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
+    color: theme.colors.text,
+  },
+  arrow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: 6,
+  },
+  arrowLine: {
+    flex: 1,
+    height: 1,
+    marginRight: -2,
+    backgroundColor: "rgba(244,227,178,0.55)",
+  },
+  slotFooter: {
+    paddingTop: 16,
+    paddingHorizontal: RAIL_WIDTH + 24,
+    paddingBottom: 40,
+  },
+  placeButton: {
+    minHeight: 50,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  placeLabel: {
+    fontFamily: theme.fonts.displayBold,
+    fontSize: 20,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    color: theme.colors.onPrimary,
+    includeFontPadding: false,
+  },
+  slotHint: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
+    marginTop: 10,
+    minHeight: 36,
   },
 });

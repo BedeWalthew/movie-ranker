@@ -195,7 +195,7 @@ A near-black neutral family in three steps, one warm amber tint, and a xenon war
 - **On Amber Muted** (`{colors.on-amber-muted}`): secondary text on amber (the lamp bar's film title, year and "N left" count).
 
 ### Secondary
-- **Xenon White** (`{colors.xenon-white}`): the lamp's own colour. Lit rank numerals and their rings (ring at 55% alpha), the lit frame's 1pt rim (55% alpha), the share sheet's frame borders (35% alpha) and heading, the comparison heading "Which do you prefer?", and the full-strength 2pt rim that flashes on a picked frame.
+- **Xenon White** (`{colors.xenon-white}`): the lamp's own colour. Lit rank numerals and their rings (ring at 55% alpha), the lit frame's 1pt rim (55% alpha), the share sheet's frame borders (35% alpha) and heading, the comparison headings "Which do you prefer?" and "Where does it go?", the slot arrow and gap dashes (55% alpha, full-strength arrowhead), and the full-strength 2pt rim that flashes on a picked frame.
 
 ### Neutral
 - **Emulsion Black** (`{colors.emulsion-black}`): the ground for every screen, header, tab bar, darkening overlay and the countdown ring's fill.
@@ -242,7 +242,7 @@ Portrait iPhone only; no tablet, landscape or size-class branches exist. Every l
 
 The Ranked screen stacks: overline count (16pt horizontal, 8pt below), the full-width 64pt lamp bar with no radius, then the reel filling to the tab bar. The reel is a vertical snap carousel with a 236pt pitch (`Reel.PITCH`): a 192x288pt poster plus a 64pt caption band, so neighbours tuck 52pt under the lit frame. The gate is lifted 56pt above the visible centre so the next frame peeks below the caption; the floating tab bar (safe-area bottom + 50pt) is subtracted from the visible height. The lit frame's caption hangs off the poster: the 96pt numeral overlaps the bottom-left corner (caption offset -40pt up, -28pt left) and the title block sits 10pt right of it.
 
-The Unranked screen is a plain list on the same strip: rows are 44x66pt thumb, 14pt gap, title block, then a Rank pill; 10pt vertical and 16pt horizontal padding; hairline separators inset to the text column (16 + 44 + 14 = 74pt). The comparison modal splits the strip into two frames of `(width - 36 - 16 - 12) / 2` with a 12pt gap; the detail screen's gate poster is `width - 36 - 48` wide at 2:3, with the label block padded 42pt (rail + 24) and 44pt (`spacing.gate`) below the poster.
+The Unranked screen is a plain list on the same strip: rows are 44x66pt thumb, 14pt gap, title block, then a Rank pill; 10pt vertical and 16pt horizontal padding; hairline separators inset to the text column (16 + 44 + 14 = 74pt). The comparison modal splits the strip into two frames of `(width - 36 - 16 - 12) / 2` with a 12pt gap in Pick mode; in Slot mode it is a row of the film to place (at most 150pt wide, 2:3), a 40pt arrow, and the 130pt slot reel, all centred on the gate line, above a wide Place button; the detail screen's gate poster is `width - 36 - 48` wide at 2:3, with the label block padded 42pt (rail + 24) and 44pt (`spacing.gate`) below the poster.
 
 Rhythm: 4 / 8 / 12 / 16 / 24 / 28 / 44 / 48. Vertical steps between blocks are 8 (meta under title is 4), 12 (empty-state gap), 14–16 (row gaps), 24–28 (between button and link), 44 (from gate to label), 48 (empty-state side padding, bottom scroll padding).
 
@@ -320,6 +320,17 @@ The one amber block on the Ranked screen: full width, 64pt min height, square co
 ### Comparison Frame
 Two posters at `(width - 64) / 2`, 2:3, in one gate with a 12pt gap, both resting fully lit (no overlay). Tapping one lights a 2pt xenon rim over 180ms `Easing.out(Easing.exp)` while the other dims under a 0.6 black overlay on the same curve, a Light impact haptic fires, and the flow advances after 180ms; a Success notification haptic fires when the film lands. Pressed scale 0.98. A ranked comparison film carries a small countdown numeral 8pt from its top-right corner.
 
+### Mode Switch
+A segmented pill at the top of the ranking sheet, level with the close disc: 32pt high, 1pt lamp amber stroke at 45%, two 64pt-min segments ("PICK", "SLOT") in Big Shoulders Bold 15pt caps. The selected segment fills amber with on-amber text; the other is amber text on black, pressed at 0.7. The choice is saved (the `settings` table, key `rankMode`) and the next ranking opens in it.
+
+### Slot Reel (signature)
+Slot mode's alternative to Pick. The film to place rests on the left with a 1pt xenon rim; a 1pt xenon line at 55% ends in a 10pt `arrowtriangle.right.fill` pointing at the gate, where 6x1pt dashes cross the reel. The reel is a narrow, non-wrapping `FlatList` of 104x156pt posters with a 16pt Bold caps title, snapping at a 204pt pitch to the **gaps** between frames, not the frames: offset `g * 204` puts gap g (above the film at index g) in the gate, so n films have n + 1 slots including above #1 and below the last. Styling is a function of `d = index + 0.5 - scrollY / 204`, so the two frames flanking the gate rest at d = ±0.5:
+- spread (translateY): -14 → +14 linearly over d = -0.5 → 0.5, clamped, so the flanking pair parts to open the slot
+- scale: 1 / 0.86 / 0.76 at |d| = 0.5 / 1.5 / 2.5
+- dark overlay: 0 / 0.7 / 0.86 at |d| = 0.5 / 1.5 / 2.5; rim 1 → 0 over |d| = 0.5 → 1; title 1 → 0 over 0.5 → 1.1
+- the small countdown numeral overhangs each poster's top-left and only fades to 0.45, so ranks stay readable while scrolling
+A new film opens on the middle slot; a re-ranked film opens on the slot it already holds. The wide "PLACE AT #N" button updates as gaps reach the gate, with the SF caption "Between X and Y. Leaving now changes nothing." beneath; nothing is written until it is pressed. Haptics: `selection` per gap once the reel has been dragged (silent while it settles on open), `notification.success` on placement. Reduce Motion drops scale and spread. For VoiceOver the reel is one adjustable element ("Slot", value "Number N, between X and Y") whose increment/decrement jump one gap.
+
 ### Motion grammar
 - The reel is scroll-driven: there are no fixed durations; state follows the finger, then the snap settles it. Values interpolate linearly and clamp.
 - Discrete transitions use 180ms: the comparison lit/dim flash (`Easing.out(Easing.exp)`), poster image fade-in.
@@ -348,7 +359,7 @@ Two posters at `(width - 64) / 2`, 2:3, in one gate with a 12pt gap, both restin
 - **Don't** set Big Shoulders in sentence case, or SF in caps.
 - **Don't** add rank badges to posters outside the countdown ring, or a poster grid with a search field on top of it (the share image is the one grid, and it is an export).
 - **Don't** build a custom search bar, custom tab bar or custom action sheet; the system ones wear the booth's colours.
-- **Don't** type or drag ranks; the only rank control is a comparison.
+- **Don't** type ranks or drag frames to reorder; a rank is only ever set in the ranking sheet, by a comparison (Pick) or by lining a gap up with the gate (Slot).
 - **Don't** invent a light appearance, an iPad layout or a landscape layout: none is designed (see below).
 
 ### Not yet designed

@@ -13,6 +13,13 @@ export const CREATE_MOVIES_TABLE = `
   );
 `;
 
+export const CREATE_SETTINGS_TABLE = `
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY NOT NULL,
+    value TEXT NOT NULL
+  );
+`;
+
 export interface Movie {
   id: string;
   title: string;

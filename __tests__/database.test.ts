@@ -1,4 +1,12 @@
-import { CREATE_MOVIES_TABLE, DB_NAME } from '@/lib/schema';
+import { CREATE_MOVIES_TABLE, CREATE_SETTINGS_TABLE, DB_NAME } from '@/lib/schema';
+
+describe('CREATE_SETTINGS_TABLE SQL', () => {
+  it('should create a key/value settings table keyed by name', () => {
+    expect(CREATE_SETTINGS_TABLE).toContain('CREATE TABLE IF NOT EXISTS settings');
+    expect(CREATE_SETTINGS_TABLE).toMatch(/key\s+TEXT\s+PRIMARY KEY\s+NOT NULL/);
+    expect(CREATE_SETTINGS_TABLE).toMatch(/value\s+TEXT\s+NOT NULL/);
+  });
+});
 
 describe('Database Configuration', () => {
   describe('DB_NAME', () => {
