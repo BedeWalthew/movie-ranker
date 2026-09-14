@@ -20,16 +20,16 @@ describe('Navigation Constants', () => {
       expect(HEADER_MENU_ITEMS).toContain('Import CSV');
     });
 
-    it('should include "Settings"', () => {
-      expect(HEADER_MENU_ITEMS).toContain('Settings');
+    it('should include "Reset Movies"', () => {
+      expect(HEADER_MENU_ITEMS).toContain('Reset Movies');
     });
 
     it('should include "Share Top 10"', () => {
       expect(HEADER_MENU_ITEMS).toContain('Share Top 10');
     });
 
-    it('should have exactly 4 menu items', () => {
-      expect(HEADER_MENU_ITEMS).toHaveLength(4);
+    it('should have exactly 3 menu items', () => {
+      expect(HEADER_MENU_ITEMS).toHaveLength(3);
     });
   });
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
-import UnrankedScreen from '@/app/(tabs)/unranked';
+import UnrankedScreen from '@/app/(tabs)/(unranked)/unranked';
 import { RefreshProvider } from '@/lib/refreshContext';
 import type { Movie } from '@/lib/schema';
 

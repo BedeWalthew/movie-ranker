@@ -42,14 +42,14 @@ describe('RankNudgeCard', () => {
     expect(screen.getByText('2019')).toBeTruthy();
   });
 
-  it('displays the CTA text', () => {
+  it('names the action', () => {
     render(<RankNudgeCard movie={mockMovie} onPress={jest.fn()} />);
-    expect(screen.getByText('Rank this movie!')).toBeTruthy();
+    expect(screen.getByText('Rank a random film')).toBeTruthy();
   });
 
-  it('displays the prompt heading', () => {
-    render(<RankNudgeCard movie={mockMovie} onPress={jest.fn()} />);
-    expect(screen.getByText('Rank a movie?')).toBeTruthy();
+  it('shows how many films are left to rank when told', () => {
+    render(<RankNudgeCard movie={mockMovie} onPress={jest.fn()} remaining={42} />);
+    expect(screen.getByText('42 left')).toBeTruthy();
   });
 
   it('shows poster thumbnail when posterUrl is present', () => {

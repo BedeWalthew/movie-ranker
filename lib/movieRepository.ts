@@ -22,6 +22,13 @@ export async function getUnrankedMovies(db: SQLiteDatabase): Promise<Movie[]> {
   return db.getAllAsync<Movie>('SELECT * FROM movies WHERE rank IS NULL');
 }
 
+export async function getUnrankedCount(db: SQLiteDatabase): Promise<number> {
+  const row = await db.getFirstAsync<{ n: number }>(
+    'SELECT COUNT(*) AS n FROM movies WHERE rank IS NULL',
+  );
+  return row?.n ?? 0;
+}
+
 export async function getRandomUnrankedMovie(db: SQLiteDatabase): Promise<Movie | null> {
   return db.getFirstAsync<Movie>(
     'SELECT * FROM movies WHERE rank IS NULL ORDER BY RANDOM() LIMIT 1',

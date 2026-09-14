@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-14T22:45:00+01:00",
+  "title": "Design System: Movie Ranker",
+  "extensions": {
+    "colorMeta": {
+      "lamp-amber": {
+        "role": "primary",
+        "displayName": "Lamp Amber",
+        "canonical": "#C8801E",
+        "tonalRamp": ["oklch(15% 0.06 68)", "oklch(25% 0.09 68)", "oklch(35% 0.12 68)", "oklch(45% 0.14 68)", "oklch(55% 0.14 68)", "oklch(64% 0.14 68)", "oklch(80% 0.11 68)", "oklch(95% 0.04 68)"]
+      },
+      "lamp-amber-pressed": {
+        "role": "primary",
+        "displayName": "Lamp Amber Pressed",
+        "canonical": "#A8680F",
+        "tonalRamp": ["oklch(15% 0.06 68)", "oklch(25% 0.09 68)", "oklch(35% 0.12 68)", "oklch(45% 0.14 68)", "oklch(55% 0.13 68)", "oklch(65% 0.14 68)", "oklch(80% 0.11 68)", "oklch(95% 0.04 68)"]
+      },
+      "on-amber": {
+        "role": "primary",
+        "displayName": "On Amber",
+        "canonical": "#0A0A0A",
+        "tonalRamp": ["oklch(13% 0 0)", "oklch(25% 0 0)", "oklch(35% 0 0)", "oklch(45% 0 0)", "oklch(55% 0 0)", "oklch(65% 0 0)", "oklch(80% 0 0)", "oklch(95% 0 0)"]
+      },
+      "on-amber-muted": {
+        "role": "primary",
+        "displayName": "On Amber Muted",
+        "canonical": "#3A2308",
+        "tonalRamp": ["oklch(15% 0.03 65)", "oklch(27% 0.05 65)", "oklch(35% 0.06 65)", "oklch(45% 0.07 65)", "oklch(55% 0.08 65)", "oklch(65% 0.08 65)", "oklch(80% 0.06 65)", "oklch(95% 0.02 65)"]
+      },
+      "xenon-white": {
+        "role": "secondary",
+        "displayName": "Xenon White",
+        "canonical": "#F4E3B2",
+        "tonalRamp": ["oklch(15% 0.03 88)", "oklch(25% 0.04 88)", "oklch(35% 0.05 88)", "oklch(45% 0.06 88)", "oklch(55% 0.06 88)", "oklch(65% 0.06 88)", "oklch(80% 0.06 88)", "oklch(91% 0.06 88)"]
+      },
+      "emulsion-black": {
+        "role": "neutral",
+        "displayName": "Emulsion Black",
+        "canonical": "#050505",
+        "tonalRamp": ["oklch(11% 0 0)", "oklch(16% 0 0)", "oklch(23% 0 0)", "oklch(35% 0 0)", "oklch(50% 0 0)", "oklch(65% 0 0)", "oklch(80% 0 0)", "oklch(95% 0 0)"]
+      },
+      "strip-rail": {
+        "role": "neutral",
+        "displayName": "Strip Rail",
+        "canonical": "#0B0B0C",
+        "tonalRamp": ["oklch(14% 0.002 270)", "oklch(20% 0.002 270)", "oklch(30% 0.002 270)", "oklch(40% 0.002 270)", "oklch(50% 0.002 270)", "oklch(65% 0.002 270)", "oklch(80% 0.002 270)", "oklch(95% 0.002 270)"]
+      },
+      "spool-chrome": {
+        "role": "neutral",
+        "displayName": "Spool Chrome",
+        "canonical": "#0F0F10",
+        "tonalRamp": ["oklch(16% 0.002 270)", "oklch(23% 0.002 270)", "oklch(32% 0.002 270)", "oklch(42% 0.002 270)", "oklch(52% 0.002 270)", "oklch(65% 0.002 270)", "oklch(80% 0.002 270)", "oklch(95% 0.002 270)"]
+      },
+      "sprocket-punch": {
+        "role": "neutral",
+        "displayName": "Sprocket Punch",
+        "canonical": "#1C1C1E",
+        "tonalRamp": ["oklch(15% 0.003 270)", "oklch(23% 0.003 270)", "oklch(33% 0.003 270)", "oklch(43% 0.003 270)", "oklch(53% 0.003 270)", "oklch(65% 0.003 270)", "oklch(80% 0.003 270)", "oklch(95% 0.003 270)"]
+      },
+      "emulsion-text": {
+        "role": "neutral",
+        "displayName": "Emulsion Text",
+        "canonical": "#EDE6D6",
+        "tonalRamp": ["oklch(15% 0.01 85)", "oklch(25% 0.015 85)", "oklch(35% 0.02 85)", "oklch(45% 0.02 85)", "oklch(55% 0.02 85)", "oklch(65% 0.02 85)", "oklch(80% 0.02 85)", "oklch(92% 0.02 85)"]
+      },
+      "leader-grey": {
+        "role": "neutral",
+        "displayName": "Leader Grey",
+        "canonical": "#9A958A",
+        "tonalRamp": ["oklch(15% 0.008 90)", "oklch(25% 0.01 90)", "oklch(35% 0.012 90)", "oklch(45% 0.012 90)", "oklch(55% 0.012 90)", "oklch(65% 0.012 90)", "oklch(80% 0.012 90)", "oklch(95% 0.008 90)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Native large titles and the comparison heading; 36pt on the detail title, 40pt on the share image heading." },
+      "numeral": { "displayName": "Countdown Numeral", "purpose": "Rank numerals inside the hairline ring; 54 / 30 / 20pt for lg / md / sm. Font scaling disabled." },
+      "headline": { "displayName": "Headline", "purpose": "The lit frame's title on the reel (22pt); empty-state headings at 26pt." },
+      "title": { "displayName": "Title", "purpose": "Film titles in rows and comparison frames; the lamp bar's action line." },
+      "button": { "displayName": "Button", "purpose": "Pill and ghost button labels, chips (15pt), the unranked badge (16pt), the wide primary button (20pt)." },
+      "overline": { "displayName": "Overline (count)", "purpose": "The film count under the large title. Carries data; it is not a kicker." },
+      "body": { "displayName": "Body", "purpose": "Empty-state copy, hints, detail meta (16pt)." },
+      "action": { "displayName": "Inline Action", "purpose": "SF semibold in amber for Re-rank and Open on Letterboxd; on-amber-muted titles inside the lamp bar." },
+      "caption": { "displayName": "Caption", "purpose": "Years, progress, hints under buttons; tabular numerals." }
+    },
+    "shadows": [
+      { "name": "lamp", "value": "0 12px 24px rgba(0,0,0,0.6)", "purpose": "Under the lit frame on the reel and the detail gate poster only; fades in with the lit state." },
+      { "name": "row", "value": "0 4px 8px rgba(0,0,0,0.5)", "purpose": "Under a countdown numeral overlapping a poster." }
+    ],
+    "motion": [
+      { "name": "reel-scroll-driven", "value": "interpolate(d) on scroll offset, no fixed duration; snap at 236pt, decelerationRate fast, no interval momentum", "purpose": "All reel frame state follows the finger; the snap settles it." },
+      { "name": "reel-scale", "value": "d 0 / 1 / 2 -> 1 / 0.8 / 0.7 (clamped)", "purpose": "Neighbours recede." },
+      { "name": "reel-tuck", "value": "d -2 / -1 / 0 / 1 / 2 -> +56 / +34 / 0 / -10 / -20 pt", "purpose": "Neighbours slide under the lit frame." },
+      { "name": "reel-dark", "value": "d 0 / 0.5 / 1 / 2 -> opacity 0 / 0.4 / 0.7 / 0.86", "purpose": "Black overlay darkens frames away from the gate." },
+      { "name": "reel-lit", "value": "d 0 -> 0.5: rim and lamp shadow opacity 1 -> 0; caption 1 -> 0 over d 0 -> 0.6", "purpose": "The lit state crossfades onto the frame reaching the gate." },
+      { "name": "flash", "value": "180ms Easing.out(Easing.exp)", "purpose": "Comparison pick: 2pt xenon rim on the chosen frame, 0.6 black overlay on the other, then advance." },
+      { "name": "image-fade", "value": "180ms", "purpose": "Poster image fade-in on load." },
+      { "name": "pressed", "value": "fill -> lamp-amber-pressed on filled controls; opacity 0.5-0.7 on text/ghost; scale 0.98 on comparison frames", "purpose": "Press feedback." },
+      { "name": "haptics", "value": "selection per frame in the gate; impact.light per pick; notification.success on placement", "purpose": "Tactile grammar." },
+      { "name": "reduce-motion", "value": "reel scale = 1, tuck = 0; opacity crossfades kept; flash unchanged", "purpose": "Reduce Motion path." }
+    ],
+    "breakpoints": [],
+    "platform": {
+      "target": "ios",
+      "orientation": "portrait iPhone only",
+      "appearance": "dark only",
+      "native": ["NativeTabs (expo-router)", "native stack large titles, uppercased", "headerSearchBarOptions integratedButton", "ActionSheetIOS dark, amber tint", "Alert", "SF Symbols via expo-symbols, semibold default"],
+      "layoutConstants": { "railWidth": 18, "holePitch": 22, "hole": "8x6 r1.5", "reelPitch": 236, "litPoster": "192x288", "captionBand": 64, "gateLift": 56, "thumb": "44x66", "lampThumb": "32x48", "lampBarMinHeight": 64, "tabBar": "safeBottom + 50" }
+    }
+  },
+  "components": [
+    {
+      "name": "Rank Pill",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The amber pill on every unranked row; pressed fill darkens, no scale.",
+      "html": "<button class=\"ds-btn-rank\">RANK</button>",
+      "css": ".ds-btn-rank { background: #C8801E; color: #0A0A0A; font-family: 'Big Shoulders Display', 'Bebas Neue', Impact, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.6px; text-transform: uppercase; min-height: 36px; min-width: 64px; padding: 0 14px; border: none; border-radius: 999px; cursor: pointer; transition: background 120ms; } .ds-btn-rank:hover, .ds-btn-rank:active { background: #A8680F; } .ds-btn-rank:focus-visible { outline: 2px solid #F4E3B2; outline-offset: 2px; }"
+    },
+    {
+      "name": "Wide Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary-wide",
+      "description": "The detail screen's Rank this film / Re-rank this film, with its SF hint beneath.",
+      "html": "<div class=\"ds-wide-wrap\"><button class=\"ds-btn-wide\">RANK THIS FILM</button><p class=\"ds-wide-hint\">A handful of head-to-head picks places it in your list.</p></div>",
+      "css": ".ds-wide-wrap { background: #050505; padding: 16px; width: 320px; } .ds-btn-wide { display: block; width: 100%; background: #C8801E; color: #0A0A0A; font-family: 'Big Shoulders Display', 'Bebas Neue', Impact, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.8px; text-transform: uppercase; min-height: 50px; border: none; border-radius: 999px; cursor: pointer; transition: background 120ms; } .ds-btn-wide:hover, .ds-btn-wide:active { background: #A8680F; } .ds-btn-wide:focus-visible { outline: 2px solid #F4E3B2; outline-offset: 2px; } .ds-wide-hint { margin: 10px 0 0; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; font-size: 13px; line-height: 18px; color: #9A958A; text-align: center; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Amber-stroked pill on black for the empty gate's secondary action.",
+      "html": "<button class=\"ds-btn-ghost\">OPEN THE UNRANKED REEL</button>",
+      "css": ".ds-btn-ghost { background: #050505; color: #C8801E; font-family: 'Big Shoulders Display', 'Bebas Neue', Impact, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.5px; text-transform: uppercase; min-height: 44px; padding: 0 18px; border: 1px solid #C8801E; border-radius: 999px; cursor: pointer; transition: opacity 120ms; } .ds-btn-ghost:hover, .ds-btn-ghost:active { opacity: 0.7; } .ds-btn-ghost:focus-visible { outline: 2px solid #F4E3B2; outline-offset: 2px; }"
+    },
+    {
+      "name": "Inline Action",
+      "kind": "button",
+      "refersTo": "action",
+      "description": "SF semibold amber text action that sits beside meta (Re-rank) or stands alone with an arrow (Open on Letterboxd).",
+      "html": "<div class=\"ds-inline-row\"><span class=\"ds-inline-year\">1999</span><button class=\"ds-inline-action\">Re-rank</button></div>",
+      "css": ".ds-inline-row { display: flex; align-items: center; gap: 12px; background: #050505; padding: 8px 12px; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; } .ds-inline-year { font-size: 13px; color: #9A958A; font-variant-numeric: tabular-nums; } .ds-inline-action { background: none; border: none; padding: 0; min-height: 28px; font: inherit; font-size: 13px; font-weight: 600; color: #C8801E; cursor: pointer; transition: opacity 120ms; } .ds-inline-action:hover, .ds-inline-action:active { opacity: 0.6; } .ds-inline-action:focus-visible { outline: 2px solid #F4E3B2; outline-offset: 2px; border-radius: 2px; }"
+    },
+    {
+      "name": "Star Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip-filter",
+      "description": "Minimum-rating chip shown while search is open; selected fills amber, tapping the selected chip clears it.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\"><svg width=\"11\" height=\"11\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z\"/></svg>3+</button><button class=\"ds-chip ds-chip-selected\"><svg width=\"11\" height=\"11\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z\"/></svg>4+</button></div>",
+      "css": ".ds-chips { display: flex; gap: 8px; padding: 8px 16px; background: #050505; } .ds-chip { display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(200,128,30,0.45); background: #050505; color: #C8801E; font-family: 'Big Shoulders Display', 'Bebas Neue', Impact, sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.4px; cursor: pointer; transition: opacity 120ms; } .ds-chip:hover, .ds-chip:active { opacity: 0.7; } .ds-chip:focus-visible { outline: 2px solid #F4E3B2; outline-offset: 2px; } .ds-chip-selected { background: #C8801E; border-color: #C8801E; color: #0A0A0A; }"
+    },
+    {
+      "name": "Lamp Bar",
+      "kind": "custom",
+      "refersTo": "lamp-bar",
+      "description": "The one amber block on the Ranked screen: a random unranked film and the primary action to rank it.",
+      "html": "<button class=\"ds-lamp\"><span class=\"ds-lamp-thumb\"></span><span class=\"ds-lamp-text\"><span class=\"ds-lamp-action\">Rank a random film</span><span class=\"ds-lamp-meta\"><span class=\"ds-lamp-title\">Avatar: Fire and Ash</span><span class=\"ds-lamp-year\">2025</span></span></span><span class=\"ds-lamp-trailing\"><span class=\"ds-lamp-left\">122 left</span><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M16 3h5v5\"/><path d=\"M4 20L21 3\"/><path d=\"M21 16v5h-5\"/><path d=\"M15 15l6 6\"/><path d=\"M4 4l5 5\"/></svg></span></button>",
+      "css": ".ds-lamp { display: flex; align-items: center; width: 360px; min-height: 64px; padding: 8px 16px 8px 12px; background: #C8801E; color: #0A0A0A; border: none; border-radius: 0; text-align: left; cursor: pointer; transition: background 120ms; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; } .ds-lamp:hover, .ds-lamp:active { background: #A8680F; } .ds-lamp:focus-visible { outline: 2px solid #F4E3B2; outline-offset: -3px; } .ds-lamp-thumb { flex: none; width: 32px; height: 48px; background: #0F0F10; border: 1px solid #0A0A0A; padding: 1px; border-radius: 3px; box-sizing: content-box; } .ds-lamp-text { flex: 1; margin-left: 12px; min-width: 0; display: flex; flex-direction: column; } .ds-lamp-action { font-family: 'Big Shoulders Display', 'Bebas Neue', Impact, sans-serif; font-weight: 700; font-size: 20px; line-height: 22px; letter-spacing: 0.6px; text-transform: uppercase; } .ds-lamp-meta { display: flex; align-items: baseline; gap: 6px; font-size: 13px; color: #3A2308; } .ds-lamp-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-lamp-year { font-variant-numeric: tabular-nums; } .ds-lamp-trailing { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; margin-left: 8px; } .ds-lamp-left { font-size: 11px; font-weight: 600; color: #3A2308; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Countdown Numeral",
+      "kind": "custom",
+      "refersTo": "numeral",
+      "description": "A rank set like an Academy leader: heavy numeral in a hairline ring with four register ticks. Lit (xenon) and unlit (leader grey).",
+      "html": "<div class=\"ds-numerals\"><div class=\"ds-numeral ds-numeral-lg\"><i class=\"ds-tick ds-tick-t\"></i><i class=\"ds-tick ds-tick-b\"></i><i class=\"ds-tick ds-tick-l\"></i><i class=\"ds-tick ds-tick-r\"></i><span>1</span></div><div class=\"ds-numeral ds-numeral-sm\"><i class=\"ds-tick ds-tick-t\"></i><i class=\"ds-tick ds-tick-b\"></i><i class=\"ds-tick ds-tick-l\"></i><i class=\"ds-tick ds-tick-r\"></i><span>10</span></div><div class=\"ds-numeral ds-numeral-sm ds-numeral-unlit\"><i class=\"ds-tick ds-tick-t\"></i><i class=\"ds-tick ds-tick-b\"></i><i class=\"ds-tick ds-tick-l\"></i><i class=\"ds-tick ds-tick-r\"></i><span>7</span></div></div>",
+      "css": ".ds-numerals { display: flex; align-items: center; gap: 24px; padding: 16px; background: #050505; } .ds-numeral { position: relative; display: flex; align-items: center; justify-content: center; background: #050505; border: 1px solid rgba(244,227,178,0.55); border-radius: 50%; color: #F4E3B2; font-family: 'Big Shoulders Display', 'Bebas Neue', Impact, sans-serif; font-weight: 900; line-height: 1.05; box-shadow: 0 4px 8px rgba(0,0,0,0.5); } .ds-numeral-lg { width: 96px; height: 96px; font-size: 54px; } .ds-numeral-sm { width: 36px; height: 36px; font-size: 20px; } .ds-numeral-unlit { color: #9A958A; border-color: rgba(154,149,138,0.35); } .ds-tick { position: absolute; background: rgba(244,227,178,0.55); } .ds-numeral-unlit .ds-tick { background: rgba(154,149,138,0.35); } .ds-numeral-lg .ds-tick-t, .ds-numeral-lg .ds-tick-b { width: 1px; height: 9px; left: 50%; } .ds-numeral-lg .ds-tick-l, .ds-numeral-lg .ds-tick-r { height: 1px; width: 9px; top: 50%; } .ds-numeral-sm .ds-tick-t, .ds-numeral-sm .ds-tick-b { width: 1px; height: 4px; left: 50%; } .ds-numeral-sm .ds-tick-l, .ds-numeral-sm .ds-tick-r { height: 1px; width: 4px; top: 50%; } .ds-tick-t { top: 0; } .ds-tick-b { bottom: 0; } .ds-tick-l { left: 0; } .ds-tick-r { right: 0; }"
+    },
+    {
+      "name": "Reel Frame (lit and unlit)",
+      "kind": "card",
+      "refersTo": "frame-lit",
+      "description": "The frame in the gate: 192x288 poster, 1pt xenon rim at 55%, lamp shadow, numeral overlapping the bottom-left, caps title. Beside it an unlit neighbour at 0.8 scale under a 0.7 black overlay.",
+      "html": "<div class=\"ds-reel\"><div class=\"ds-rail\"></div><div class=\"ds-frame ds-frame-unlit\"><div class=\"ds-poster\"></div><div class=\"ds-dark\"></div></div><div class=\"ds-frame ds-frame-lit\"><div class=\"ds-poster\"></div><div class=\"ds-rim\"></div><div class=\"ds-caption\"><div class=\"ds-numeral ds-numeral-lg\"><span>1</span></div><div class=\"ds-caption-text\"><div class=\"ds-caption-title\">Fight Club</div><div class=\"ds-caption-meta\"><span>1999</span><span class=\"ds-caption-action\">Re-rank</span></div></div></div></div><div class=\"ds-rail ds-rail-right\"></div></div>",
+      "css": ".ds-reel { position: relative; display: flex; align-items: flex-end; justify-content: center; gap: 24px; padding: 32px 40px 72px; background: #050505; overflow: hidden; } .ds-rail { position: absolute; top: 0; bottom: 0; left: 0; width: 18px; background: #0B0B0C; border-right: 1px solid #1C1C1E; background-image: radial-gradient(4px 3px at 9px 11px, #1C1C1E 98%, transparent 100%); background-size: 18px 22px; } .ds-rail-right { left: auto; right: 0; border-right: none; border-left: 1px solid #1C1C1E; } .ds-frame { position: relative; width: 192px; height: 288px; border-radius: 4px; flex: none; } .ds-poster { width: 100%; height: 100%; border-radius: 4px; background: #0F0F10 linear-gradient(160deg, #2a2320, #0F0F10); } .ds-frame-lit { box-shadow: 0 12px 24px rgba(0,0,0,0.6); } .ds-rim { position: absolute; inset: 0; border: 1px solid rgba(244,227,178,0.55); border-radius: 4px; pointer-events: none; } .ds-dark { position: absolute; inset: 0; background: #050505; opacity: 0.7; border-radius: 4px; } .ds-frame-unlit { transform: scale(0.8) translateY(34px); transform-origin: center bottom; } .ds-caption { position: absolute; left: -28px; top: 248px; display: flex; align-items: flex-start; width: 248px; } .ds-numeral { position: relative; display: flex; align-items: center; justify-content: center; background: #050505; border: 1px solid rgba(244,227,178,0.55); border-radius: 50%; color: #F4E3B2; font-family: 'Big Shoulders Display', 'Bebas Neue', Impact, sans-serif; font-weight: 900; line-height: 1.05; box-shadow: 0 4px 8px rgba(0,0,0,0.5); } .ds-numeral-lg { width: 96px; height: 96px; font-size: 54px; flex: none; } .ds-caption-text { margin: 44px 0 0 10px; } .ds-caption-title { font-family: 'Big Shoulders Display', 'Bebas Neue', Impact, sans-serif; font-weight: 700; font-size: 22px; line-height: 23px; letter-spacing: 0.4px; text-transform: uppercase; color: #EDE6D6; } .ds-caption-meta { display: flex; gap: 12px; margin-top: 4px; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; font-size: 13px; color: #9A958A; font-variant-numeric: tabular-nums; } .ds-caption-action { font-weight: 600; color: #C8801E; }"
+    },
+    {
+      "name": "Unranked Row",
+      "kind": "card",
+      "refersTo": "row-unranked",
+      "description": "One film on the unranked strip: 44x66 thumb, caps title, year and stars, Rank pill; hairline separator inset to the text column.",
+      "html": "<div class=\"ds-rows\"><div class=\"ds-row\"><div class=\"ds-row-thumb\"></div><div class=\"ds-row-text\"><div class=\"ds-row-title\">Parasite</div><div class=\"ds-row-meta\"><span>2019</span><span class=\"ds-stars\">★★★½</span></div></div><button class=\"ds-btn-rank\">RANK</button></div><div class=\"ds-sep\"></div><div class=\"ds-row\"><div class=\"ds-row-thumb\"></div><div class=\"ds-row-text\"><div class=\"ds-row-title\">Inglourious Basterds</div><div class=\"ds-row-meta\"><span>2009</span><span class=\"ds-stars\">★★★</span></div></div><button class=\"ds-btn-rank\">RANK</button></div></div>",
+      "css": ".ds-rows { width: 360px; background: #050505; padding: 0 18px; } .ds-row { display: flex; align-items: center; gap: 14px; padding: 10px 16px; min-height: 86px; box-sizing: border-box; } .ds-row-thumb { flex: none; width: 44px; height: 66px; border-radius: 2px; background: #0F0F10; border: 1px solid #1C1C1E; box-sizing: border-box; } .ds-row-text { flex: 1; min-width: 0; } .ds-row-title { font-family: 'Big Shoulders Display', 'Bebas Neue', Impact, sans-serif; font-weight: 700; font-size: 20px; line-height: 21px; letter-spacing: 0.3px; text-transform: uppercase; color: #EDE6D6; } .ds-row-meta { display: flex; align-items: center; gap: 10px; margin-top: 4px; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; font-size: 13px; color: #9A958A; font-variant-numeric: tabular-nums; } .ds-stars { color: #C8801E; font-size: 11px; letter-spacing: 1px; } .ds-sep { height: 1px; background: #1C1C1E; margin-left: 74px; } .ds-btn-rank { background: #C8801E; color: #0A0A0A; font-family: 'Big Shoulders Display', 'Bebas Neue', Impact, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.6px; text-transform: uppercase; min-height: 36px; min-width: 64px; padding: 0 14px; border: none; border-radius: 999px; cursor: pointer; transition: background 120ms; } .ds-btn-rank:hover, .ds-btn-rank:active { background: #A8680F; } .ds-btn-rank:focus-visible { outline: 2px solid #F4E3B2; outline-offset: 2px; }"
+    },
+    {
+      "name": "Tab Bar and Large Title",
+      "kind": "nav",
+      "refersTo": "nav-tab-bar",
+      "description": "Native chrome in the booth's colours: uppercased Big Shoulders Black large title with the count overline, and the two-tab bar with amber selected state.",
+      "html": "<div class=\"ds-shell\"><div class=\"ds-header\"><div class=\"ds-header-actions\"><span class=\"ds-header-btn\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"7.5\" cy=\"12\" r=\"1.2\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"12\" r=\"1.2\" fill=\"currentColor\"/><circle cx=\"16.5\" cy=\"12\" r=\"1.2\" fill=\"currentColor\"/></svg></span><span class=\"ds-header-btn ds-header-btn-search\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"M15.5 15.5L21 21\"/></svg></span></div><div class=\"ds-large-title\">Ranked</div><div class=\"ds-overline\">18 films ranked</div></div><div class=\"ds-tabs\"><button class=\"ds-tab ds-tab-selected\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><rect x=\"3\" y=\"7\" width=\"18\" height=\"13\" rx=\"2\"/><rect x=\"6\" y=\"3\" width=\"12\" height=\"2\" rx=\"1\"/></svg><span>Ranked</span></button><button class=\"ds-tab\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M3 13l2-8h14l2 8v6H3z\"/><path d=\"M3 13h5a4 4 0 0 0 8 0h5\"/></svg><span>Unranked</span></button></div></div>",
+      "css": ".ds-shell { width: 360px; background: #050505; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; } .ds-header { padding: 12px 16px 8px; } .ds-header-actions { display: flex; justify-content: flex-end; gap: 10px; } .ds-header-btn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #0F0F10; color: #C8801E; } .ds-header-btn-search { color: #EDE6D6; } .ds-large-title { margin-top: 20px; font-family: 'Big Shoulders Display', 'Bebas Neue', Impact, sans-serif; font-weight: 900; font-size: 34px; line-height: 36px; text-transform: uppercase; color: #EDE6D6; } .ds-overline { margin-top: 10px; font-family: 'Big Shoulders Display', 'Bebas Neue', Impact, sans-serif; font-weight: 500; font-size: 15px; letter-spacing: 0.8px; text-transform: uppercase; color: #9A958A; } .ds-tabs { display: flex; justify-content: center; gap: 4px; margin: 24px auto 12px; padding: 4px; width: 200px; border-radius: 999px; background: #0F0F10; border: 1px solid #1C1C1E; } .ds-tab { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; padding: 6px 0; border: none; border-radius: 999px; background: transparent; color: #9A958A; font: inherit; font-size: 11px; cursor: pointer; } .ds-tab:hover { color: #EDE6D6; } .ds-tab:focus-visible { outline: 2px solid #F4E3B2; } .ds-tab-selected { background: #1C1C1E; color: #C8801E; font-weight: 600; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Projection Booth",
+    "overview": "Movie Ranker is a dark room with one lamp. Every list surface is a strip of film running between two perforated rails; one frame sits in the gate and is lit, and everything else falls back into emulsion black. Lamp amber is the single tint and it is spent only on the things that move the reel forward: the primary action, the active tab, the Rank buttons, the inline Re-rank link. Xenon warm white is rarer still, reserved for the lit frame's rim, the rank numeral, and the one heading that asks the question. The poster is the unit of identity; type supports it and stays out of its way.\n\nThe world is native iPhone underneath. Navigation is a system tab bar, per-tab native stacks with large titles, the integrated search button, and the system action sheet. Character lives in the deck, the type, and the motion: Big Shoulders Display in caps for anything that names a film or an action, SF for anything that explains, and a scroll-driven reel that dims, scales and tucks its neighbours while the frame in the gate lights up with a haptic tick. Density is low on the Ranked screen (one film at a time) and list-like on Unranked (one row per film with a pill button), and both share the same rails, the same caps, the same amber.\n\nThe build rejects the category default of a poster grid with rank badges and a search field on top. It also rejects cards, decorative gradients, and glass: surfaces are flat black; depth comes from a downward lamp shadow and from darkening overlays, never from tonal panels.",
+    "keyCharacteristics": [
+      "Emulsion black ground with sprocket rails on every list surface (18pt rails, 22pt hole pitch)",
+      "One tint (lamp amber) for actions; xenon white for lit rims, numerals and the question heading",
+      "Big Shoulders Display caps for titles and buttons; system SF for body, meta and inline actions",
+      "Depth by overlay and one downward lamp shadow; no cards, no gradients, no glass",
+      "Native iOS chrome (tabs, large titles, search, action sheets, SF Symbols) in the booth's colours",
+      "Motion is scroll-driven and reduces to opacity only under Reduce Motion"
+    ],
+    "rules": [
+      { "name": "The One Lamp Rule", "body": "Lamp amber is the only tint. If a new surface wants a second accent colour, it is wrong; use xenon white for \"lit\" and leader grey for \"unlit\" instead.", "section": "colors" },
+      { "name": "The Lit Means White Rule", "body": "Amber says \"act\", xenon white says \"this is in the gate\". Numerals, rims and the question heading are white; buttons and links are amber. Do not swap them.", "section": "colors" },
+      { "name": "The Alpha Derivative Rule", "body": "Rims, rings and strokes are alphas of xenon white, leader grey or lamp amber (0.55, 0.35, 0.5, 0.45), never new hexes. The build introduces no grey between sprocket punch and leader grey.", "section": "colors" },
+      { "name": "The Caps Are Display Rule", "body": "Anything in Big Shoulders is uppercase and names a film, a screen or an action. Explanations, years, directors and hints are SF in sentence case. A caps label with no Big Shoulders is wrong; a Big Shoulders line in sentence case is wrong.", "section": "typography" },
+      { "name": "The Tabular Number Rule", "body": "Every year, count and progress figure in SF sets tabular-nums, so lists and counters do not jitter.", "section": "typography" },
+      { "name": "The Dark Falls Back Rule", "body": "Depth away from the gate is expressed by darkening, not by lightening. Neighbour opacity follows distance: 0 at the gate, 0.4 at half a frame, 0.7 at one frame, 0.86 at two.", "section": "elevation" },
+      { "name": "The Lamp Above Rule", "body": "Shadows are always offset downward with a soft blur (blur ≥ 2x offset); there are no hard offset shadows and no shadows on rows, chips or buttons.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do put sprocket rails (18pt, 22pt hole pitch) on every list or gate surface, and pad content 16pt inside them.",
+      "Do spend lamp amber only on actions and the active tab; use xenon white for lit rims, numerals and the question heading.",
+      "Do set every film title, screen title and button label in Big Shoulders Display caps, and every explanation, year and hint in system SF.",
+      "Do express \"not in the gate\" with a black overlay (0.7 one frame away, 0.86 two) and no rim or shadow; express \"in the gate\" with a 1pt xenon rim at 55% and the lamp shadow (0 12 24 @ 0.6).",
+      "Do use native chrome: NativeTabs, native stack large titles, the integrated search button, ActionSheetIOS, Alert, and SF Symbols via expo-symbols.",
+      "Do keep 4pt frame corners on posters and pills on controls; use 2pt on thumbs under 50pt wide.",
+      "Do fire a selection haptic when a frame reaches the gate and a light impact on a pick; keep discrete transitions at 180ms exponential ease-out.",
+      "Do honour Reduce Motion by dropping scale and tuck and keeping opacity crossfades.",
+      "Do set tabular-nums on years, counts and progress.",
+      "Do render a missing poster as a spool-chrome frame with a regular-weight film glyph, never an initial letter or a blank."
+    ],
+    "donts": [
+      "Don't introduce a second accent, a lighter panel colour, or a grey between sprocket punch and leader grey; alphas of the existing colours are the only derivatives.",
+      "Don't add cards, decorative gradients, glass or blur; depth is overlay plus one downward lamp shadow.",
+      "Don't put shadows on rows, chips or buttons, or use a hard offset shadow anywhere.",
+      "Don't set Big Shoulders in sentence case, or SF in caps.",
+      "Don't add rank badges to posters outside the countdown ring, or a poster grid with a search field on top of it (the share image is the one grid, and it is an export).",
+      "Don't build a custom search bar, custom tab bar or custom action sheet; the system ones wear the booth's colours.",
+      "Don't type or drag ranks; the only rank control is a comparison.",
+      "Don't invent a light appearance, an iPad layout or a landscape layout: none is designed."
+    ]
+  }
+}

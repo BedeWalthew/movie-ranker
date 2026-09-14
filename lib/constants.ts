@@ -7,7 +7,6 @@ export const HEADER_MENU_ITEMS = [
   "Import CSV",
   "Share Top 10",
   "Reset Movies",
-  "Settings",
 ] as const;
 
 export const WORKER_URL = "https://movie-ranker-worker.bede-movie.workers.dev";

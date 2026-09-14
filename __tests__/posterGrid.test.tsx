@@ -24,7 +24,7 @@ function makeMovies(count: number): Movie[] {
 describe('PosterGrid', () => {
   it('renders the title heading', () => {
     render(<PosterGrid movies={makeMovies(3)} />);
-    expect(screen.getByText('My Top Movies')).toBeTruthy();
+    expect(screen.getByText('My Top Ten')).toBeTruthy();
   });
 
   it('renders all movie titles', () => {
@@ -39,7 +39,7 @@ describe('PosterGrid', () => {
     const movies = makeMovies(4);
     render(<PosterGrid movies={movies} />);
     movies.forEach((m) => {
-      expect(screen.getByText(`#${m.rank}`)).toBeTruthy();
+      expect(screen.getByText(`${m.rank}`)).toBeTruthy();
     });
   });
 

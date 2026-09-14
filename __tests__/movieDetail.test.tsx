@@ -9,6 +9,13 @@ const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
   useLocalSearchParams: jest.fn(),
   useRouter: jest.fn(() => ({ back: mockBack, push: mockPush })),
+  useFocusEffect: (cb: () => void | (() => void)) => {
+    const { useEffect } = require('react');
+    useEffect(() => {
+      const cleanup = cb();
+      return typeof cleanup === 'function' ? cleanup : undefined;
+    }, [cb]);
+  },
   Stack: { Screen: () => null },
 }));
 
@@ -121,7 +128,9 @@ describe('MovieDetailScreen', () => {
 
     render(<MovieDetailScreen />);
 
-    expect(await screen.findByText('#3')).toBeTruthy();
+    const rank = await screen.findByTestId('detail-rank');
+    expect(rank).toBeTruthy();
+    expect(screen.getByText('3')).toBeTruthy();
   });
 
   it('displays "Unranked" label when movie has no rank', async () => {
@@ -131,6 +140,20 @@ describe('MovieDetailScreen', () => {
     render(<MovieDetailScreen />);
 
     expect(await screen.findByText('Unranked')).toBeTruthy();
+    expect(screen.queryByTestId('detail-rank')).toBeNull();
+  });
+
+  it('starts a re-rank for a ranked film and a first rank for an unranked one', async () => {
+    mockGetMovieById.mockResolvedValueOnce(rankedMovie);
+    render(<MovieDetailScreen />);
+    fireEvent.press(await screen.findByTestId('detail-rank-button'));
+    expect(mockPush).toHaveBeenCalledWith('/comparison?movieId=movie-1&rerank=true');
+
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ id: 'movie-2' });
+    mockGetMovieById.mockResolvedValueOnce(unrankedMovie);
+    render(<MovieDetailScreen />);
+    fireEvent.press(await screen.findByTestId('detail-rank-button'));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/comparison', params: { movieId: 'movie-2' } });
   });
 
   it('shows "Director unknown" when director is null', async () => {

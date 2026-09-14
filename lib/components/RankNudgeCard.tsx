@@ -1,75 +1,106 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/lib/theme';
-import type { Movie } from '@/lib/schema';
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { Icon } from "@/lib/components/Icon";
+import { theme } from "@/lib/theme";
+import { Poster } from "@/lib/components/Poster";
+import type { Movie } from "@/lib/schema";
 
-interface RankNudgeCardProps {
+/**
+ * The lamp bar: the one amber block on the Ranked screen. It holds a film
+ * drawn at random from the unranked pool; tapping it starts that film's
+ * comparisons. A new film is drawn every time the screen comes back.
+ */
+export function RankNudgeCard({
+  movie,
+  onPress,
+  remaining,
+}: {
   movie: Movie;
   onPress: () => void;
-}
-
-export function RankNudgeCard({ movie, onPress }: RankNudgeCardProps) {
+  remaining?: number;
+}) {
   return (
-    <TouchableOpacity
+    <Pressable
       testID="rank-nudge-card"
       onPress={onPress}
-      activeOpacity={0.8}
-      style={{
-        backgroundColor: theme.colors.surface,
-        borderRadius: 12,
-        margin: 12,
-        padding: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: theme.colors.primary,
-      }}
+      accessibilityRole="button"
+      accessibilityLabel={`Rank a random film: ${movie.title}, ${movie.year}`}
+      style={({ pressed }) => [
+        styles.bar,
+        pressed && { backgroundColor: theme.colors.primaryPressed },
+      ]}
     >
-      {movie.posterUrl ? (
-        <Image
+      <View style={styles.thumb}>
+        <Poster
+          uri={movie.posterUrl}
+          width={32}
+          height={48}
+          radius={2}
           testID="nudge-poster"
-          source={{ uri: movie.posterUrl }}
-          style={{ width: 50, height: 75, borderRadius: 6 }}
+          placeholderTestID="nudge-poster-placeholder"
         />
-      ) : (
-        <View
-          testID="nudge-poster-placeholder"
-          style={{
-            width: 50,
-            height: 75,
-            borderRadius: 6,
-            backgroundColor: theme.colors.surfaceLight,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Ionicons name="film-outline" size={24} color={theme.colors.textSecondary} />
+      </View>
+      <View style={{ flex: 1, marginLeft: 12 }}>
+        <Text style={styles.action} numberOfLines={1}>
+          Rank a random film
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
+          <Text style={styles.title} numberOfLines={1}>
+            {movie.title}
+          </Text>
+          <Text style={styles.year}>{movie.year}</Text>
         </View>
-      )}
-      <View style={{ marginLeft: 14, flex: 1 }}>
-        <Text style={{ color: theme.colors.primary, fontSize: 13, fontWeight: '600', marginBottom: 4 }}>
-          Rank a movie?
-        </Text>
-        <Text style={{ color: theme.colors.text, fontSize: 16, fontWeight: '700' }}>
-          {movie.title}
-        </Text>
-        <Text style={{ color: theme.colors.textSecondary, fontSize: 13, marginTop: 2 }}>
-          {movie.year}
-        </Text>
       </View>
-      <View
-        style={{
-          backgroundColor: theme.colors.primary,
-          borderRadius: 8,
-          paddingHorizontal: 12,
-          paddingVertical: 8,
-        }}
-      >
-        <Text style={{ color: theme.colors.background, fontSize: 13, fontWeight: '700' }}>
-          Rank this movie!
-        </Text>
+      <View style={styles.trailing}>
+        {typeof remaining === "number" && (
+          <Text style={styles.remaining}>{remaining} left</Text>
+        )}
+        <Icon name="shuffle" size={22} color={theme.colors.onPrimary} />
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  bar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 8,
+    paddingLeft: 12,
+    paddingRight: 16,
+    minHeight: 64,
+  },
+  thumb: {
+    borderWidth: 1,
+    borderColor: theme.colors.onPrimary,
+    borderRadius: 3,
+    padding: 1,
+    backgroundColor: theme.colors.onPrimary,
+  },
+  action: {
+    fontFamily: theme.fonts.displayBold,
+    fontSize: 20,
+    lineHeight: 22,
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+    color: theme.colors.onPrimary,
+  },
+  title: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: theme.colors.onPrimaryMuted,
+    flexShrink: 1,
+  },
+  year: {
+    fontSize: 13,
+    color: theme.colors.onPrimaryMuted,
+    fontVariant: ["tabular-nums"],
+  },
+  trailing: { alignItems: "flex-end", gap: 2, marginLeft: 8 },
+  remaining: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: theme.colors.onPrimaryMuted,
+    fontVariant: ["tabular-nums"],
+  },
+});

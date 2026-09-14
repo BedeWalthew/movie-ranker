@@ -1,8 +1,14 @@
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { theme } from '@/lib/theme';
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useFonts } from "expo-font";
+import { theme, fontAssets } from "@/lib/theme";
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts(fontAssets);
+
+  // Hold on the black splash until the display face is ready.
+  if (!fontsLoaded && !fontError) return null;
+
   return (
     <>
       <StatusBar style="light" />
@@ -17,23 +23,19 @@ export default function RootLayout() {
           name="movie/[id]"
           options={{
             headerShown: true,
-            headerStyle: { backgroundColor: theme.colors.headerBackground },
-            headerTintColor: theme.colors.text,
+            headerTransparent: true,
+            headerTintColor: theme.colors.primary,
+            headerBackButtonDisplayMode: "minimal",
+            title: "",
           }}
         />
         <Stack.Screen
           name="comparison"
-          options={{
-            presentation: 'modal',
-            headerShown: false,
-          }}
+          options={{ presentation: "modal", headerShown: false }}
         />
         <Stack.Screen
           name="share"
-          options={{
-            presentation: 'modal',
-            headerShown: false,
-          }}
+          options={{ presentation: "modal", headerShown: false }}
         />
       </Stack>
     </>

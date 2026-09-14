@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react-native';
-import RankedScreen from '@/app/(tabs)/index';
-import UnrankedScreen from '@/app/(tabs)/unranked';
+import RankedScreen from '@/app/(tabs)/(ranked)/index';
+import UnrankedScreen from '@/app/(tabs)/(unranked)/unranked';
 import { RefreshProvider } from '@/lib/refreshContext';
 
 // Mock database module
@@ -13,10 +13,12 @@ jest.mock('@/lib/database', () => ({
 const mockGetUnrankedMovies = jest.fn().mockResolvedValue([]);
 const mockGetRankedMovies = jest.fn().mockResolvedValue([]);
 const mockGetRandomUnrankedMovie = jest.fn().mockResolvedValue(null);
+const mockGetUnrankedCount = jest.fn().mockResolvedValue(0);
 jest.mock('@/lib/movieRepository', () => ({
   getUnrankedMovies: (...args: any[]) => mockGetUnrankedMovies(...args),
   getRankedMovies: (...args: any[]) => mockGetRankedMovies(...args),
   getRandomUnrankedMovie: (...args: any[]) => mockGetRandomUnrankedMovie(...args),
+  getUnrankedCount: (...args: any[]) => mockGetUnrankedCount(...args),
 }));
 
 jest.mock('expo-sqlite', () => ({}));
@@ -41,11 +43,11 @@ describe('Screen Components', () => {
       expect(screen.getByTestId('ranked-screen')).toBeTruthy();
     });
 
-    it('should display placeholder text', async () => {
+    it('should display the empty gate when nothing is ranked', async () => {
       renderWithRefresh(<RankedScreen />);
       const placeholder = await screen.findByTestId('ranked-placeholder');
       expect(placeholder).toBeTruthy();
-      expect(screen.getByText('Ranked Movies')).toBeTruthy();
+      expect(screen.getByText('Nothing in the gate yet')).toBeTruthy();
     });
 
     it('should use dark background color', () => {
@@ -148,7 +150,7 @@ describe('Screen Components', () => {
       renderWithRefresh(<UnrankedScreen />);
       const emptyState = await screen.findByTestId('unranked-empty');
       expect(emptyState).toBeTruthy();
-      expect(screen.getByText('Unranked Movies')).toBeTruthy();
+      expect(screen.getByText('The reel is empty')).toBeTruthy();
     });
 
     it('should use dark background color', () => {

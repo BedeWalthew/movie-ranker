@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import RankedScreen from '@/app/(tabs)/index';
+import RankedScreen from '@/app/(tabs)/(ranked)/index';
 import type { Movie } from '@/lib/schema';
 
 // Mock database module
@@ -12,9 +12,11 @@ jest.mock('@/lib/database', () => ({
 // Mock movieRepository
 const mockGetRankedMovies = jest.fn();
 const mockGetRandomUnrankedMovie = jest.fn();
+const mockGetUnrankedCount = jest.fn();
 jest.mock('@/lib/movieRepository', () => ({
   getRankedMovies: (...args: any[]) => mockGetRankedMovies(...args),
   getRandomUnrankedMovie: (...args: any[]) => mockGetRandomUnrankedMovie(...args),
+  getUnrankedCount: (...args: any[]) => mockGetUnrankedCount(...args),
 }));
 
 // Mock expo-sqlite
@@ -72,6 +74,7 @@ describe('RankedScreen', () => {
     const mockDb = {};
     mockGetDatabase.mockResolvedValue(mockDb);
     mockGetRandomUnrankedMovie.mockResolvedValue(null);
+    mockGetUnrankedCount.mockResolvedValue(0);
   });
 
   it('renders ranked movies list', async () => {
