@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.movieranker.app"
+      "bundleIdentifier": "com.vabe.movieranker"
     },
     "plugins": [
       "expo-router",
