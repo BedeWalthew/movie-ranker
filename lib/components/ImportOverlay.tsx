@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Modal, View, Text, Pressable, StyleSheet, useWindowDimensions } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming, Easing } from "react-native-reanimated";
+import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming, Easing } from "react-native-reanimated";
 import { theme } from "@/lib/theme";
 import { CountdownNumeral } from "@/lib/components/CountdownNumeral";
 import { SprocketRail, RAIL_WIDTH } from "@/lib/components/SprocketRail";
@@ -26,19 +26,14 @@ export function ImportOverlay({ state, onDismiss }: { state: ImportState; onDism
   // as a short lamp sweep so the sheet never looks frozen.
   const sweep = useSharedValue(0);
   useEffect(() => {
-    if (state.phase !== "reading") return;
-    let alive = true;
-    const loop = () => {
-      if (!alive) return;
-      sweep.value = 0;
-      sweep.value = withTiming(1, { duration: 1100, easing: Easing.inOut(Easing.quad) }, () => {
-        if (alive) loop();
-      });
-    };
-    loop();
-    return () => {
-      alive = false;
-    };
+    if (state.phase !== "reading") {
+      cancelAnimation(sweep);
+      return;
+    }
+    sweep.value = 0;
+    // Repeated on the UI thread; a JS callback here would crash a Release build.
+    sweep.value = withRepeat(withTiming(1, { duration: 1100, easing: Easing.inOut(Easing.quad) }), -1, false);
+    return () => cancelAnimation(sweep);
   }, [state.phase, sweep]);
   const sweepStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: (trackW - 48) * sweep.value }],
