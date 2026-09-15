@@ -31,10 +31,16 @@ Last updated: 2026-09-15.
 
 ## 2. Code and config before the first upload
 
-- [ ] Add `ITSAppUsesNonExemptEncryption = false` (HTTPS only, so exempt), so uploads skip the export compliance question
-- [ ] Update Node on this Mac (20.18 is below Expo's 20.19.4 minimum)
-- [ ] Apply Expo patch updates with `npx expo install --fix` (e.g. `expo` 55.0.7 → 55.0.31, `react-native` 0.83.2 → 0.83.10), then run tests and a Release build on the phone
-- [ ] Match the splash background (`#0D0D0D` in `app.json`) to the app's emulsion black (`#050505`)
+`ios/` is generated and not in git: native config lives in `app.json`, and `npx expo prebuild --platform ios --clean` rebuilds the project from it (signing team included, via `ios.appleTeamId`).
+
+- [x] `ITSAppUsesNonExemptEncryption = false` via `ios.config.usesNonExemptEncryption` (HTTPS only, so exempt); uploads skip the export compliance question
+- [x] Explicit `ios.buildNumber` (`"1"`) in `app.json`, ready to bump per upload
+- [x] Node on this Mac updated to 20.20.2 (Expo needs 20.19.4+)
+- [x] Expo patch updates: `expo` 55.0.31, `expo-router` 55.0.18, `react-native` 0.83.10 and the matching expo modules. `jest` and `@types/jest` stay on 30 through `expo.install.exclude` in `package.json`.
+- [x] Splash background matches the app's emulsion black (`#050505`)
+- [x] Type-check and all 266 tests pass on the updated packages
+- [x] Release build on the phone with the updated packages
+- [ ] Move this Mac to Node 22 or 24 LTS (Homebrew marks `node@20` deprecated; Node 20 is past end of life). Check the other projects on this Mac first.
 
 ## 3. First TestFlight build
 
