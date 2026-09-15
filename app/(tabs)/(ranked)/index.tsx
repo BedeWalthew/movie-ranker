@@ -118,15 +118,16 @@ export default function RankedScreen() {
             <Text style={styles.emptyBody}>
               {nudgeMovie
                 ? "Tap the amber bar to rank your first film. It takes one tap; every film after that takes a handful of picks."
-                : "Import your Letterboxd export from the menu, then rank films one at a time."}
+                : "Add the films you have seen, or import a Letterboxd export from the menu. Then rank them one at a time."}
             </Text>
             {!nudgeMovie && (
               <Pressable
-                onPress={() => router.push("/(tabs)/unranked")}
+                testID="ranked-add-film"
+                onPress={() => router.push("/add")}
                 accessibilityRole="button"
                 style={({ pressed }) => [styles.emptyAction, pressed && { opacity: 0.7 }]}
               >
-                <Text style={styles.emptyActionLabel}>Open the unranked reel</Text>
+                <Text style={styles.emptyActionLabel}>Add a film</Text>
               </Pressable>
             )}
           </View>

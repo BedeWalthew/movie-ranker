@@ -8,6 +8,7 @@ function makeMovie(overrides: Partial<Movie> & { id: string; rank: number }): Mo
     title: `Movie ${overrides.rank}`,
     year: 2020,
     letterboxdUri: `https://letterboxd.com/film/${overrides.id}`,
+    tmdbId: null,
     letterboxdRating: 4.0,
     posterUrl: `https://image.tmdb.org/t/p/w500/${overrides.id}.jpg`,
     director: 'Director',

@@ -13,11 +13,12 @@ CREATE TABLE IF NOT EXISTS movies (
   id               TEXT PRIMARY KEY,
   title            TEXT    NOT NULL,
   year             INTEGER NOT NULL,
-  letterboxdUri    TEXT    NOT NULL UNIQUE,
+  letterboxdUri    TEXT,
   letterboxdRating REAL,
   posterUrl        TEXT,
   director         TEXT,
-  rank             INTEGER
+  rank             INTEGER,
+  tmdbId           INTEGER
 );
 ```
 
@@ -28,11 +29,16 @@ CREATE TABLE IF NOT EXISTS movies (
 | `id` | TEXT | No | UUID v4, generated at import time |
 | `title` | TEXT | No | Movie title (from Letterboxd CSV) |
 | `year` | INTEGER | No | Release year |
-| `letterboxdUri` | TEXT | No | Letterboxd profile URL (unique constraint for deduplication) |
+| `letterboxdUri` | TEXT | Yes | Letterboxd film link from the CSV, used to skip films already imported. Null for a film added by hand until an import links it |
 | `letterboxdRating` | REAL | Yes | User's Letterboxd rating (0–10 scale, null if unrated) |
 | `posterUrl` | TEXT | Yes | TMDB poster image URL (`https://image.tmdb.org/t/p/w500/...`) |
 | `director` | TEXT | Yes | Director name from TMDB credits |
 | `rank` | INTEGER | Yes | Position in ranked list (1 = best). Null means unranked. |
+| `tmdbId` | INTEGER | Yes | TMDB's id for the film, used to recognise a film already on the reel. Null for imports made before it was recorded; those match on title and year |
+
+## Migration
+
+Databases created before manual adding have `letterboxdUri NOT NULL` and no `tmdbId`. `migrateMoviesTable` in `lib/database.ts` runs once per launch from `getDatabase()`: when either is out of date it rebuilds the table (`movies_next`, copy every existing column, drop, rename) inside a transaction, since SQLite cannot relax `NOT NULL` in place.
 
 ## TypeScript Interface
 
@@ -41,11 +47,12 @@ interface Movie {
   id: string;
   title: string;
   year: number;
-  letterboxdUri: string;
+  letterboxdUri: string | null;
   letterboxdRating: number | null;
   posterUrl: string | null;
   director: string | null;
   rank: number | null;
+  tmdbId: number | null;
 }
 ```
 

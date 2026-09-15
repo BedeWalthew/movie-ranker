@@ -70,7 +70,7 @@ Local-only persistence using expo-sqlite. Single `movies` table stores all movie
 
 ### Cloudflare Worker
 
-Stateless HTTP proxy that keeps the TMDB API key server-side. Single endpoint: `GET /movie?title=X&year=Y`. Returns poster URL and director name. Rate-limited to 30 requests per minute per IP.
+Stateless HTTP proxy that keeps the TMDB API key server-side. `GET /movie?title=X&year=Y` returns the TMDB id, poster URL and director for an imported film; `GET /search?query=X` and `GET /details?id=N` back the Add a film sheet. Rate-limited to 300 requests per minute per IP, shared across endpoints. See `worker/README.md`.
 
 ## Key Design Decisions
 

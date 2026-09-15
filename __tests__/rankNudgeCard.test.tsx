@@ -13,6 +13,7 @@ const mockMovie: Movie = {
   title: 'Parasite',
   year: 2019,
   letterboxdUri: 'https://letterboxd.com/film/parasite-2019/',
+  tmdbId: null,
   letterboxdRating: 4.5,
   posterUrl: 'https://image.tmdb.org/poster.jpg',
   director: 'Bong Joon-ho',

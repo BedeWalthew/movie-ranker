@@ -8,11 +8,11 @@ ios
 
 ## Users
 
-Letterboxd users who export their watched list as a CSV and want a true, personal ordering of every film they have seen. Primary scene: alone on a phone, in the evening or on a commute, in short sessions of a few minutes, answering "which of these two did I like more?" until the list settles. Intended for App Store release, so first-run and empty states must teach the loop without a manual.
+People who want a true, personal ordering of every film they have seen: Letterboxd users who import their watched list as a CSV, and anyone else who adds films one at a time by title. Primary scene: alone on a phone, in the evening or on a commute, in short sessions of a few minutes, answering "which of these two did I like more?" until the list settles. Intended for App Store release, so first-run and empty states must teach the loop without a manual.
 
 ## Product Purpose
 
-Movie Ranker turns a flat watched list into a ranked list through pairwise choices. Import a Letterboxd CSV, then rank films one at a time by answering a handful of head-to-head comparisons each. Success is a ranked list the user trusts and enjoys revisiting, and a top ten they want to share.
+Movie Ranker turns a flat watched list into a ranked list through pairwise choices. Import a Letterboxd CSV or add films by title, then rank films one at a time by answering a handful of head-to-head comparisons each. Success is a ranked list the user trusts and enjoys revisiting, and a top ten they want to share.
 
 ## Positioning
 
@@ -20,7 +20,8 @@ Ranking by binary insertion: each new film needs only about log2(N) comparisons 
 
 ## Operating Context
 
-- Data enters only through a Letterboxd export CSV (Import CSV). Posters, year and director are fetched through the project's Cloudflare Worker TMDB proxy at import time.
+- Films enter two ways: a Letterboxd export CSV (Import CSV in the menu), or one at a time from the Add a film sheet (the plus in the navigation bar and the empty-state buttons), which searches TMDB by title. Posters, year and director come through the project's Cloudflare Worker TMDB proxy (`/movie` for imports, `/search` and `/details` for adding).
+- A film already on the reel is recognised by TMDB id, or by title and year for imports made before ids were recorded. Search shows it as on the reel (Rank) or ranked (its number) instead of offering Add; an import completes a film added by hand with its Letterboxd link and rating instead of duplicating it.
 - All state lives in a local SQLite database on the device; there is no account and no sync.
 - Two pools: Unranked (imported, not yet placed) and Ranked (ordered, rank 1 is best).
 - Ranking a film opens the comparison flow as a modal; abandoning it changes nothing.
@@ -31,7 +32,7 @@ Ranking by binary insertion: each new film needs only about log2(N) comparisons 
 ## Capabilities and Constraints
 
 - Stack: Expo 55, expo-router, React Native 0.83, expo-sqlite, expo-image. Tests run under Jest with React Native Testing Library; screens carry testIDs that the suite relies on.
-- Fields per film: title, year, director, Letterboxd rating (0.5 to 5 stars, may be missing), poster URL (may be missing), rank (null when unranked).
+- Fields per film: title, year, director, Letterboxd link and rating (0.5 to 5 stars; both missing for films added by hand, the rating may be missing on imports), poster URL (may be missing), TMDB id (missing on imports made before it was recorded), rank (null when unranked).
 - Filtering by title search and by minimum Letterboxd rating exists on both lists.
 - Portrait only, iPhone only (no tablet layout).
 - Redesign scope confirmed 2026-09-14: nothing in navigation or flows is sacred except the binary comparison mechanism and the data model. Appearance is dark only.

@@ -1,11 +1,13 @@
+import { View } from "react-native";
 import { Stack } from "expo-router";
 import { theme } from "@/lib/theme";
 import { HeaderMenu } from "@/lib/components/HeaderMenu";
+import { AddFilmButton } from "@/lib/components/AddFilmButton";
 import { ScreenSearchProvider, useScreenSearch } from "@/lib/screenSearch";
 
 /**
  * Each tab is its own native stack: a large title that collapses on scroll,
- * the system search field in the bar, and the menu on the right.
+ * the system search field in the bar, and Add a film and the menu on the right.
  */
 export function TabStack({
   title,
@@ -51,7 +53,12 @@ function TabStackInner({
           fontSize: 34,
           color: theme.colors.text,
         },
-        headerRight: () => <HeaderMenu />,
+        headerRight: () => (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <AddFilmButton />
+            <HeaderMenu />
+          </View>
+        ),
         headerSearchBarOptions: {
           placeholder: searchPlaceholder,
           placement: "integratedButton",

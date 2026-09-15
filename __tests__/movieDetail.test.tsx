@@ -1,4 +1,5 @@
 import React from 'react';
+import { Linking } from 'react-native';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { theme } from '@/lib/theme';
@@ -39,6 +40,7 @@ const rankedMovie: Movie = {
   title: 'Parasite',
   year: 2019,
   letterboxdUri: 'https://letterboxd.com/film/parasite-2019/',
+  tmdbId: null,
   letterboxdRating: 4.5,
   posterUrl: 'https://image.tmdb.org/t/p/w500/poster.jpg',
   director: 'Bong Joon-ho',
@@ -50,6 +52,7 @@ const unrankedMovie: Movie = {
   title: 'The Matrix',
   year: 1999,
   letterboxdUri: 'https://letterboxd.com/film/the-matrix/',
+  tmdbId: null,
   letterboxdRating: 4.0,
   posterUrl: null,
   director: 'Lana Wachowski',
@@ -61,6 +64,7 @@ const minimalMovie: Movie = {
   title: 'Unknown Film',
   year: 2020,
   letterboxdUri: 'https://letterboxd.com/film/unknown/',
+  tmdbId: null,
   letterboxdRating: null,
   posterUrl: null,
   director: null,
@@ -154,6 +158,37 @@ describe('MovieDetailScreen', () => {
     render(<MovieDetailScreen />);
     fireEvent.press(await screen.findByTestId('detail-rank-button'));
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/comparison', params: { movieId: 'movie-2' } });
+  });
+
+  it('opens an imported film at its own Letterboxd page', async () => {
+    const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    mockGetMovieById.mockResolvedValueOnce(rankedMovie);
+
+    render(<MovieDetailScreen />);
+    fireEvent.press(await screen.findByTestId('detail-letterboxd-link'));
+
+    expect(openURL).toHaveBeenCalledWith('https://letterboxd.com/film/parasite-2019/');
+    openURL.mockRestore();
+  });
+
+  it('opens a film added by hand on Letterboxd through its TMDB id', async () => {
+    const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    mockGetMovieById.mockResolvedValueOnce({ ...unrankedMovie, letterboxdUri: null, tmdbId: 603 });
+
+    render(<MovieDetailScreen />);
+    fireEvent.press(await screen.findByTestId('detail-letterboxd-link'));
+
+    expect(openURL).toHaveBeenCalledWith('https://letterboxd.com/tmdb/603');
+    openURL.mockRestore();
+  });
+
+  it('hides the Letterboxd link when there is nothing to link to', async () => {
+    mockGetMovieById.mockResolvedValueOnce({ ...minimalMovie, letterboxdUri: null, tmdbId: null });
+
+    render(<MovieDetailScreen />);
+    await screen.findByText('Unknown Film');
+
+    expect(screen.queryByTestId('detail-letterboxd-link')).toBeNull();
   });
 
   it('shows "Director unknown" when director is null', async () => {

@@ -272,7 +272,7 @@ Rims are 1pt strokes at 55% xenon white on the lit frame; the comparison pick fl
 - **Primary (Rank pill):** lamp amber fill, on-amber text, 17pt/0.6pt tracking, 36pt min height, 64pt min width, 14pt horizontal padding.
 - **Primary wide ("Rank this film" / "Re-rank this film"):** same fill, 50pt min height, 20pt/0.8pt tracking, stretches to the label column; a 13pt SF hint sits 10pt beneath it.
 - **Pressed:** fill drops to lamp amber pressed. No scale, no opacity change on filled buttons.
-- **Ghost ("Open the unranked reel"):** 1pt lamp amber stroke on black, amber 17pt caps, 44pt min height, 18pt padding; pressed at 0.7 opacity.
+- **Ghost ("Add a film" on the empty Ranked and Unranked screens):** 1pt lamp amber stroke on black, amber 17pt caps, 44pt min height, 18pt padding; pressed at 0.7 opacity.
 - **Inline actions ("Re-rank", "Open on Letterboxd"):** SF semibold amber, 13pt beside meta or 15pt standalone, min 28–44pt hit height, pressed at 0.6 opacity; the link carries a 13pt `arrow.up.right` SF Symbol.
 
 ### Chips
@@ -285,19 +285,20 @@ There are no cards. The containers are frames and rows:
 - **Frame (unlit):** same poster with a black overlay at 0.7–0.86 and no rim or shadow, scaled 0.8 (one away) or 0.7 (two away).
 - **Poster placeholder:** spool chrome fill, hairline sprocket-punch border, a regular-weight `film` SF Symbol in leader grey sized at 28% of the width (min 20pt).
 - **Row (unranked):** 44x66 thumb at 2pt radius, title 20pt caps, year and stars beneath, Rank pill trailing; hairline separator inset to the text column; row pressed at 0.6 opacity.
+- **Row (search hit, Add a film):** the unranked row's geometry with a TMDB w185 thumb; the meta line reads the year, then "· On your reel" or "· Ranked" once the film is there. The trailing control is an amber Add pill (a small on-amber spinner while it saves), an amber Rank pill once the film is on the reel, or the small unlit countdown numeral when it is ranked. The TMDB credit sits beneath the list in SF 12pt leader grey.
 
 ### Inputs / Fields
-- **Search:** the native navigation-bar search (`integratedButton` placement), amber tint, emulsion text, spool chrome bar. No custom text fields exist.
+- **Search:** the native navigation-bar search (`integratedButton` placement on the tabs, `stacked` in the Add a film sheet, where it is focused once the sheet has risen), amber tint, emulsion text, spool chrome bar. No custom text fields exist.
 
 ### Navigation
 - **Tab bar:** `NativeTabs`, emulsion black background, amber tint; SF Symbols `film.stack` / `film.stack.fill` and `tray` / `tray.fill`; inactive icons and labels in leader grey, selected in amber.
-- **Stacks:** one native stack per tab with `headerLargeTitle`, the title uppercased, Big Shoulders Black 34pt large / Bold 20pt inline in emulsion text, no header shadow, amber tint for the back chevron and buttons. The header carries the search button and an amber `ellipsis.circle` (22pt) on the right.
+- **Stacks:** one native stack per tab with `headerLargeTitle`, the title uppercased, Big Shoulders Black 34pt large / Bold 20pt inline in emulsion text, no header shadow, amber tint for the back chevron and buttons. The header carries the search button and, sharing one bar group on the right, an amber `plus` (Add a film) and `ellipsis.circle`, both 22pt.
 - **Header menu:** `ActionSheetIOS` in dark style with amber tint; Import CSV, Share Top 10, Reset Movies (destructive). Confirmations are system `Alert`s.
-- **Modals:** comparison and share are sheet presentations with no header; the comparison draws its own 36x5pt grabber in sprocket punch and a 32pt spool-chrome close disc with a 16pt `xmark` in leader grey.
+- **Modals:** Add a film is a sheet with a native header ("ADD A FILM" in Bold 20pt caps, a 17pt amber `xmark` on the right) above the stacked search bar; comparison and share are sheet presentations with no header; the comparison draws its own 36x5pt grabber in sprocket punch and a 32pt spool-chrome close disc with a 16pt `xmark` in leader grey.
 - **Detail:** transparent header, minimal back button in amber, no title.
 
 ### Icons
-SF Symbols only, via `expo-symbols`, semibold by default (regular for the placeholder film glyph). Sizes used: 11 (stars in rows), 13 (link arrow), 16 (close), 22 (shuffle, ellipsis).
+SF Symbols only, via `expo-symbols`, semibold by default (regular for the placeholder film glyph). Sizes used: 11 (stars in rows), 13 (link arrow), 16 (comparison close), 17 (Add a film close), 22 (shuffle, plus, ellipsis).
 
 ### The Reel (signature)
 A vertical `FlatList` snapping at a 236pt pitch with `decelerationRate="fast"` and interval momentum disabled, data tripled so ranks wrap silently (#1 follows the last; the list re-centres in the middle copy when a scroll settles in an outer one; wrapping requires at least 2 films). All frame styling is a function of `d`, the distance from the gate in frames, interpolated from the scroll offset on the UI thread:

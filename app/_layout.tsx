@@ -37,6 +37,23 @@ export default function RootLayout() {
           name="share"
           options={{ presentation: "modal", headerShown: false }}
         />
+        <Stack.Screen
+          name="add"
+          options={{
+            presentation: "modal",
+            headerShown: true,
+            title: "ADD A FILM",
+            headerShadowVisible: false,
+            headerStyle: { backgroundColor: theme.colors.headerBackground },
+            headerTintColor: theme.colors.primary,
+            headerTitleStyle: {
+              fontFamily: theme.fonts.displayBold,
+              fontSize: 20,
+              color: theme.colors.text,
+            },
+            contentStyle: { backgroundColor: theme.colors.background },
+          }}
+        />
       </Stack>
     </>
   );

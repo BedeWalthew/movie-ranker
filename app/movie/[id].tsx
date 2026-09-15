@@ -58,6 +58,9 @@ export default function MovieDetailScreen() {
   const posterW = width - RAIL_WIDTH * 2 - 48;
   const posterH = Math.round(posterW * 1.5);
   const ranked = movie.rank !== null;
+  // A film added by hand has no Letterboxd link; Letterboxd resolves TMDB ids.
+  const letterboxdUrl =
+    movie.letterboxdUri ?? (movie.tmdbId !== null ? `https://letterboxd.com/tmdb/${movie.tmdbId}` : null);
 
   return (
     <>
@@ -136,14 +139,17 @@ export default function MovieDetailScreen() {
               : "A handful of head-to-head picks places it in your list."}
           </Text>
 
-          <Pressable
-            accessibilityRole="link"
-            onPress={() => Linking.openURL(movie.letterboxdUri).catch(() => {})}
-            style={({ pressed }) => [styles.link, pressed && { opacity: 0.6 }]}
-          >
-            <Text style={styles.linkLabel}>Open on Letterboxd</Text>
-            <Icon name="arrow.up.right" size={13} color={theme.colors.primary} />
-          </Pressable>
+          {letterboxdUrl && (
+            <Pressable
+              testID="detail-letterboxd-link"
+              accessibilityRole="link"
+              onPress={() => Linking.openURL(letterboxdUrl).catch(() => {})}
+              style={({ pressed }) => [styles.link, pressed && { opacity: 0.6 }]}
+            >
+              <Text style={styles.linkLabel}>Open on Letterboxd</Text>
+              <Icon name="arrow.up.right" size={13} color={theme.colors.primary} />
+            </Pressable>
+          )}
         </View>
       </ScrollView>
     </>

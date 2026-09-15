@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react-native';
+import { render, waitFor, fireEvent } from '@testing-library/react-native';
 import UnrankedScreen from '@/app/(tabs)/(unranked)/unranked';
 import { RefreshProvider } from '@/lib/refreshContext';
 import type { Movie } from '@/lib/schema';
@@ -20,8 +20,9 @@ jest.mock('@/lib/movieRepository', () => ({
 jest.mock('expo-sqlite', () => ({}));
 
 // Mock expo-router
+const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
-  useRouter: jest.fn(() => ({ push: jest.fn(), back: jest.fn() })),
+  useRouter: jest.fn(() => ({ push: mockPush, back: jest.fn() })),
   useFocusEffect: (cb: () => void) => {
     const { useEffect } = require('react');
     useEffect(() => { cb(); }, []);
@@ -38,6 +39,7 @@ const sampleMovies: Movie[] = [
     title: 'Parasite',
     year: 2019,
     letterboxdUri: 'https://letterboxd.com/film/parasite/',
+    tmdbId: null,
     letterboxdRating: 5,
     posterUrl: 'https://image.tmdb.org/poster1.jpg',
     director: 'Bong Joon-ho',
@@ -48,6 +50,7 @@ const sampleMovies: Movie[] = [
     title: 'The Matrix',
     year: 1999,
     letterboxdUri: 'https://letterboxd.com/film/the-matrix/',
+    tmdbId: null,
     letterboxdRating: 4.5,
     posterUrl: null,
     director: 'Lana Wachowski',
@@ -75,6 +78,15 @@ describe('UnrankedScreen', () => {
     await waitFor(() => {
       expect(getByTestId('unranked-empty')).toBeTruthy();
     });
+  });
+
+  it('offers to add a film from the empty reel', async () => {
+    mockGetUnrankedMovies.mockResolvedValue([]);
+    const { findByTestId } = renderWithRefresh(<UnrankedScreen />);
+
+    fireEvent.press(await findByTestId('unranked-add-film'));
+
+    expect(mockPush).toHaveBeenCalledWith('/add');
   });
 
   it('displays movie titles when unranked movies exist', async () => {

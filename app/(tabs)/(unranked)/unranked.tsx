@@ -144,8 +144,16 @@ export default function UnrankedScreen() {
         <View testID="unranked-empty" style={styles.emptyGate}>
           <Text style={styles.emptyTitle}>The reel is empty</Text>
           <Text style={styles.emptyBody}>
-            Export your watched films from Letterboxd, then choose Import CSV from the menu. Every film lands here until you rank it.
+            Add the films you have seen, or bring your whole history with Import CSV from the menu. Every film waits here until you rank it.
           </Text>
+          <Pressable
+            testID="unranked-add-film"
+            onPress={() => router.push("/add")}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.emptyAction, pressed && { opacity: 0.7 }]}
+          >
+            <Text style={styles.emptyActionLabel}>Add a film</Text>
+          </Pressable>
         </View>
       </View>
     );
@@ -285,5 +293,21 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     color: theme.colors.textSecondary,
     textAlign: "center",
+  },
+  emptyAction: {
+    marginTop: 8,
+    minHeight: 44,
+    paddingHorizontal: 18,
+    justifyContent: "center",
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+  },
+  emptyActionLabel: {
+    fontFamily: theme.fonts.displayBold,
+    fontSize: 17,
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    color: theme.colors.primary,
   },
 });

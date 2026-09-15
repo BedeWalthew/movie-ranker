@@ -1,10 +1,11 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import type { Movie } from './schema';
+import type { ReelEntry } from './reelMatch';
 
 export async function insertMovie(db: SQLiteDatabase, movie: Movie): Promise<void> {
   await db.runAsync(
-    `INSERT OR IGNORE INTO movies (id, title, year, letterboxdUri, letterboxdRating, posterUrl, director, rank)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR IGNORE INTO movies (id, title, year, letterboxdUri, letterboxdRating, posterUrl, director, rank, tmdbId)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       movie.id,
       movie.title,
@@ -14,7 +15,36 @@ export async function insertMovie(db: SQLiteDatabase, movie: Movie): Promise<voi
       movie.posterUrl,
       movie.director,
       movie.rank,
+      movie.tmdbId,
     ],
+  );
+}
+
+/** Every film's identity and rank, for telling whether a film is already on the reel. */
+export async function getReelEntries(db: SQLiteDatabase): Promise<ReelEntry[]> {
+  return db.getAllAsync<ReelEntry>(
+    'SELECT id, title, year, tmdbId, rank, letterboxdUri FROM movies',
+  );
+}
+
+export async function getMovieByTmdbId(
+  db: SQLiteDatabase,
+  tmdbId: number,
+): Promise<Movie | null> {
+  return db.getFirstAsync<Movie>('SELECT * FROM movies WHERE tmdbId = ?', [tmdbId]);
+}
+
+/** Gives a film added by hand the Letterboxd link and rating from an import. */
+export async function linkLetterboxd(
+  db: SQLiteDatabase,
+  movieId: string,
+  link: { letterboxdUri: string; letterboxdRating: number | null; tmdbId: number | null },
+): Promise<void> {
+  await db.runAsync(
+    `UPDATE movies
+     SET letterboxdUri = ?, letterboxdRating = ?, tmdbId = COALESCE(tmdbId, ?)
+     WHERE id = ?`,
+    [link.letterboxdUri, link.letterboxdRating, link.tmdbId, movieId],
   );
 }
 
