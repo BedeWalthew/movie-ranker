@@ -301,7 +301,7 @@ There are no cards. The containers are frames and rows:
 SF Symbols only, via `expo-symbols`, semibold by default (regular for the placeholder film glyph). Sizes used: 11 (stars in rows), 13 (link arrow), 16 (comparison close), 17 (Add a film close), 22 (shuffle, plus, ellipsis).
 
 ### The Reel (signature)
-A vertical `FlatList` snapping at a 236pt pitch with `decelerationRate="fast"` and interval momentum disabled, data tripled so ranks wrap silently (#1 follows the last; the list re-centres in the middle copy when a scroll settles in an outer one; wrapping requires at least 2 films). All frame styling is a function of `d`, the distance from the gate in frames, interpolated from the scroll offset on the UI thread:
+A vertical `FlatList` snapping at a 236pt pitch with `decelerationRate="normal"` and interval momentum on, so travel follows the finger's speed: a flick moves one frame, a hard throw glides past dozens and snaps to the nearest. The list is repeated in an odd number of copies with at least 60 frames of travel either side of the middle one, so ranks wrap silently (#1 follows the last; once the reel is at rest outside the middle copy it jumps to the same frame there, never mid-glide; wrapping requires at least 2 films). All frame styling is a function of `d`, the distance from the gate in frames, interpolated from the scroll offset on the UI thread:
 - scale: 1 / 0.8 / 0.7 at d = 0 / 1 / 2 (clamped)
 - tuck (translateY): +56 / +34 / 0 / -10 / -20 at d = -2 / -1 / 0 / 1 / 2, so neighbours slide under the lit frame
 - dark overlay opacity: 0 / 0.4 / 0.7 / 0.86 at d = 0 / 0.5 / 1 / 2

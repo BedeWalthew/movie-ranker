@@ -36,9 +36,31 @@ const CAPTION_H = 64;
 export const FRAME_H = POSTER_H + CAPTION_H;
 /** Distance between frames. Smaller than a frame, so neighbours tuck under the lit one. */
 export const PITCH = 236;
-const COPIES = 3;
 /** The gate sits this much above the visible centre so the next frame peeks below the caption. */
 const GATE_LIFT = 56;
+/** Frames of travel kept on each side of the middle copy, so a hard fling never reaches an end of the strip. */
+const FLING_REACH = 60;
+
+/** How many copies of the list the strip holds: an odd number with FLING_REACH frames either side of the middle one. */
+export function reelCopies(n: number): number {
+  return n >= 2 ? 2 * Math.ceil(FLING_REACH / n) + 1 : 1;
+}
+
+/** The index of the same film in the middle copy, or null when index is already in it. */
+export function wrapIndex(index: number, n: number, middle: number): number | null {
+  if (index >= middle && index < middle + n) return null;
+  return middle + (((index % n) + n) % n);
+}
+
+/**
+ * Whether a released drag has come to rest. Any speed, or a release between
+ * frames, hands over to momentum (a glide or the snap), which settles later.
+ */
+export function restsOnRelease(offsetY: number, velocityY: number | undefined): boolean {
+  const still = Math.abs(velocityY ?? 0) < 0.01;
+  const aligned = Math.abs(offsetY - Math.round(offsetY / PITCH) * PITCH) < 1;
+  return still && aligned;
+}
 
 // Reanimated's own FlatList reserves CellRendererComponent; the reel needs
 // it to keep the lit frame above its neighbours.
@@ -75,12 +97,13 @@ export function Reel({ movies, onOpen, onRerank, initialRank, onFocusRank, testI
   }, []);
 
   const n = movies.length;
-  const looped = n >= 2;
+  const copies = reelCopies(n);
+  const looped = copies > 1;
   const data = useMemo(
-    () => (looped ? Array.from({ length: COPIES }, () => movies).flat() : movies),
-    [movies, looped],
+    () => (looped ? Array.from({ length: copies }, () => movies).flat() : movies),
+    [movies, looped, copies],
   );
-  const middle = looped ? n : 0;
+  const middle = n * Math.floor(copies / 2);
 
   const startIndex = useMemo(() => {
     const i = initialRank ? movies.findIndex((m) => m.rank === initialRank) : 0;
@@ -124,18 +147,30 @@ export function Reel({ movies, onOpen, onRerank, initialRank, onFocusRank, testI
     },
   });
 
-  // Silent wrap: when the scroll settles in an outer copy, jump to the same
-  // frame in the middle copy.
-  const rewrap = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+  // Silent wrap: once the reel is at rest outside the middle copy, jump to the
+  // same frame there. Only at rest: a jump mid-fling would stop the glide dead.
+  const rewrapAt = useCallback(
+    (offsetY: number) => {
       if (!looped) return;
-      const index = Math.round(e.nativeEvent.contentOffset.y / PITCH);
-      if (index < n * 0.5 || index >= n * 2.5) {
-        const wrapped = middle + (((index % n) + n) % n);
+      const wrapped = wrapIndex(Math.round(offsetY / PITCH), n, middle);
+      if (wrapped !== null) {
         listRef.current?.scrollToOffset({ offset: wrapped * PITCH, animated: false });
       }
     },
     [looped, n, middle],
+  );
+
+  const handleMomentumEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => rewrapAt(e.nativeEvent.contentOffset.y),
+    [rewrapAt],
+  );
+
+  const handleDragEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { contentOffset, velocity } = e.nativeEvent;
+      if (restsOnRelease(contentOffset.y, velocity?.y)) rewrapAt(contentOffset.y);
+    },
+    [rewrapAt],
   );
 
   const renderItem = useCallback(
@@ -171,13 +206,14 @@ export function Reel({ movies, onOpen, onRerank, initialRank, onFocusRank, testI
           renderItem={renderItem}
           onScroll={scrollHandler}
           scrollEventThrottle={16}
-          onMomentumScrollEnd={rewrap}
-          onScrollEndDrag={rewrap}
+          onMomentumScrollEnd={handleMomentumEnd}
+          onScrollEndDrag={handleDragEnd}
           showsVerticalScrollIndicator={false}
+          // A fling carries as far as its speed takes it, then snaps to the
+          // nearest frame: a flick moves one film, a hard throw moves dozens.
           snapToInterval={PITCH}
           snapToAlignment="start"
-          decelerationRate="fast"
-          disableIntervalMomentum
+          decelerationRate="normal"
           initialScrollIndex={startIndex}
           // Offsets ignore the top padding on purpose: initialScrollIndex then
           // lands item i at offset i * PITCH, which is exactly where it sits in
@@ -185,10 +221,12 @@ export function Reel({ movies, onOpen, onRerank, initialRank, onFocusRank, testI
           getItemLayout={(_, index) => ({ length: PITCH, offset: index * PITCH, index })}
           contentContainerStyle={{ paddingTop, paddingBottom }}
           initialNumToRender={7}
-          maxToRenderPerBatch={6}
-          windowSize={7}
+          // A wider window keeps posters drawn ahead of a long glide.
+          maxToRenderPerBatch={10}
+          windowSize={11}
           removeClippedSubviews={false}
-          extraData={focused}
+          // Cells read the focused frame from context, so a frame passing the
+          // gate restacks cells without re-rendering every row.
           CellRendererComponent={Cell}
           style={{ overflow: "visible" }}
         />
