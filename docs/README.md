@@ -31,6 +31,10 @@ Architecture Decision Records (ADRs) capturing key technical choices.
 - [ADR-0004: Binary insertion ranking algorithm](decisions/0004-binary-insertion-ranking-algorithm.md)
 - [ADR-0005: NativeWind for styling](decisions/0005-nativewind-for-styling.md)
 
+### Release
+
+- [Release To-Do](release-todo.md) — Checklist from today's build to TestFlight and the App Store
+
 ### Troubleshooting
 
 Real issues encountered and how they were solved — useful reference for future projects.
